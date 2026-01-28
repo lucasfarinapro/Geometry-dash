@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dash Mini — Juego tipo Geometry Dash (HTML)</title>
+  <style>
+    :root { --bg:#0b1020; --fg:#eaf0ff; --muted:#9fb0d0; --accent:#7cf7c7; --danger:#ff5a7a; }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    body { margin:0; background: radial-gradient(1200px 600px at 50% 0%, #15234a 0%, var(--bg) 55%, #050816 100%); color:var(--fg); }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 18px; }
+    header { display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap: wrap; }
+    h1 { font-size: 18px; margin:0; letter-spacing:.2px; }
+    .pill { display:flex; gap:10px; align-items:center; padding:10px 12px; border:1px solid rgba(255,255,255,.12); border-radius: 12px; background: rgba(0,0,0,.25); }
+    .pill b { color: var(--accent); }
+    .btns { display:flex; gap:10px; flex-wrap: wrap; }
+    button {
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      color: var(--fg);
+      padding:10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight:600;
+    }
+    button:hover { background: rgba(255,255,255,.10); }
+    button:active { transform: translateY(1px); }
+    .hint { color: var(--muted); font-size: 13px; margin-top: 6px; }
+    canvas {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 9;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: linear-gradient(#0b1330, #070a18);
+      display:block;
+      margin-top: 14px;
+      box-shadow: 0 20px 80px rgba(0,0,0,.45);
+      touch-action: manipulation;
+    }
+    .footer { display:flex; justify-content:space-between; gap:10px; flex-wrap: wrap; margin-top: 10px; color: var(--muted); font-size: 12px; }
+    .kbd { padding: 2px 8px; border:1px solid rgba(255,255,255,.18); border-bottom-width:3px; border-radius: 8px; background: rgba(255,255,255,.06); color:var(--fg); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Dash Mini — runner tipo Geometry Dash</h1>
+        <div class="hint">Salta con <span class="kbd">Espacio</span> / <span class="kbd">↑</span> / toque en pantalla. Evita pinchos. ¡Aguanta lo máximo!</div>
+      </div>
+      <div class="btns">
+        <button id="btnStart">▶️ Jugar</button>
+        <button id="btnRestart">🔄 Reiniciar</button>
+        <button id="btnMute">🔊 Sonido: ON</button>
+      </div>
+    </header>
+
+    <div class="pill" aria-live="polite">
+      <div>Puntos: <b id="score">0</b></div>
+      <div>Mejor: <b id="best">0</b></div>
+      <div>Velocidad: <b id="speed">1.0×</b></div>
+      <div>Estado: <b id="state">LISTO</b></div>
+    </div>
+
+    <canvas id="game" width="960" height="540"></canvas>
+
+    <div class="footer">
+      <div>Tip: si mantienes pulsado, no es “vuelo” — solo un salto. (Como en el original 😄)</div>
+      <div>Hecho en HTML/Canvas. Puedes tunear colores, gravedad, obstáculos y música.</div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+
+  // UI
+  const $score = document.getElementById("score");
+  const $best = document.getElementById("best");
+  const $speed = document.getElementById("speed");
+  const $state = document.getElementById("state");
+  const btnStart = document.getElementById("btnStart");
+  const btnRestart = document.getElementById("btnRestart");
+  const btnMute = document.getElementById("btnMute");
+
+  // Hi-score
+  const BEST_KEY = "dashmini_best";
+  let best = Number(localStorage.getItem(BEST_KEY) || 0);
+  $best.textContent = best.toString();
+
+  // Audio (beeps simples con WebAudio, sin archivos)
+  let audioCtx = null;
+  let muted = false;
+
+  function beep(freq=440, dur=0.06, type="sine", gain=0.03) {
+    if (muted) return;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = type;
+      o.frequency.value = freq;
+      g.gain.value = gain;
+      o.connect(g);
+      g.connect(audioCtx.destination);
+      o.start();
+      o.stop(audioCtx.currentTime + dur);
+    } catch {}
+  }
+
+  function chord() {
+    beep(523.25, 0.07, "triangle", 0.02); // C5
+    beep(659.25, 0.07, "triangle", 0.02); // E5
+    beep(783.99, 0.07, "triangle", 0.02); // G5
+  }
+
+  // Game constants
+  const W = canvas.width, H = canvas.height;
+  const groundY = Math.floor(H * 0.78);
+
+  const player = {
+    x: Math.floor(W * 0.18),
+    y: groundY,
+    size: 38,
+    vy: 0,
+    onGround: true,
+    rot: 0
+  };
+
+  const physics = {
+    gravity: 2200,
+    jumpVel: -820
+  };
+
+  let running = false;
+  let gameOver = false;
+
+  let obstacles = [];
+  let tLast = performance.now();
+  let spawnTimer = 0;
+
+  let score = 0;
+  let baseSpeed = 420; // px/s
+  let speedMul = 1.0;
+
+  // Parallax background blocks
+  const stars = Array.from({length: 90}, () => ({
+    x: Math.random() * W,
+    y: Math.random() * (H * 0.6),
+    r: Math.random() * 1.6 + 0.2,
+    s: Math.random() * 30 + 10
+  }));
+
+  function reset() {
+    obstacles = [];
+    player.y = groundY;
+    player.vy = 0;
+    player.onGround = true;
+    player.rot = 0;
+
+    score = 0;
+    speedMul = 1.0;
+    spawnTimer = 0;
+
+    gameOver = false;
+    $score.textContent = "0";
+    $speed.textContent = "1.0×";
+    $state.textContent = "LISTO";
+  }
+
+  function start() {
+    if (!running) {
+      running = true;
+      tLast = performance.now();
+      $state.textContent = "JUGANDO";
+      chord();
+      requestAnimationFrame(loop);
+    }
+  }
+
+  function end() {
+    gameOver = true;
+    running = false;
+    $state.textContent = "GAME OVER";
+    beep(220, 0.12, "sawtooth", 0.03);
+    beep(170, 0.16, "sawtooth", 0.03);
+
+    if (score > best) {
+      best = score;
+      localStorage.setItem(BEST_KEY, String(best));
+      $best.textContent = String(best);
+      chord();
+    }
+  }
+
+  function jump() {
+    if (gameOver) return;
+    if (!running) start();
+    if (player.onGround) {
+      player.vy = physics.jumpVel;
+      player.onGround = false;
+      beep(660, 0.05, "square", 0.02);
+    } else {
+      // no doble salto (como en muchos niveles clásicos)
+      beep(330, 0.03, "sine", 0.01);
+    }
+  }
+
+  function spawnObstacle() {
+    // Obstáculo tipo pincho (triángulo)
+    const size = 36 + Math.random() * 22;
+    const gap = 120 + Math.random() * 260;
+    const speed = baseSpeed * speedMul;
+
+    // Aleatoriza patrón: a veces doble, a veces triple
+    const pattern = Math.random();
+    let count = 1;
+    if (pattern > 0.78) count = 3;
+    else if (pattern > 0.55) count = 2;
+
+    for (let i = 0; i < count; i++) {
+      obstacles.push({
+        x: W + i * (size * 1.15),
+        y: groundY,
+        w: size,
+        h: size,
+        speed
+      });
+    }
+
+    spawnTimer = gap / (baseSpeed * speedMul); // segundos aprox hasta próximo spawn
+  }
+
+  function aabbCollision(px, py, ps, ox, oy, ow, oh) {
+    return (
+      px < ox + ow &&
+      px + ps > ox &&
+      py < oy &&
+      py + ps > oy - oh
+    );
+  }
+
+  function drawBackground(dt) {
+    // Stars
+    ctx.fillStyle = "#070a18";
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = "rgba(234,240,255,0.8)";
+    for (const st of stars) {
+      st.x -= st.s * dt;
+      if (st.x < -5) st.x = W + Math.random() * 40;
+      ctx.beginPath();
+      ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Horizon glow
+    const grd = ctx.createLinearGradient(0, groundY - 160, 0, groundY + 160);
+    grd.addColorStop(0, "rgba(124,247,199,0.12)");
+    grd.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, groundY - 180, W, 360);
+
+    // Ground line
+    ctx.strokeStyle = "rgba(255,255,255,0.12)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, groundY + 1);
+    ctx.lineTo(W, groundY + 1);
+    ctx.stroke();
+
+    // Ground tiles
+    const tileW = 46;
+    const move = (performance.now() / 1000) * (baseSpeed * speedMul) * 0.35;
+    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    for (let x = -tileW; x < W + tileW; x += tileW) {
+      const xx = x - (move % tileW);
+      ctx.fillRect(xx, groundY + 6, tileW - 6, 10);
+    }
+  }
+
+  function drawPlayer() {
+    // Player cube with rotation in air
+    ctx.save();
+    ctx.translate(player.x + player.size/2, player.y - player.size/2);
+    ctx.rotate(player.rot);
+
+    // Body
+    ctx.fillStyle = "#7cf7c7";
+    ctx.fillRect(-player.size/2, -player.size/2, player.size, player.size);
+
+    // Face
+    ctx.fillStyle = "rgba(0,0,0,0.35)";
+    ctx.fillRect(-player.size/2 + 7, -player.size/2 + 9, 10, 10);
+    ctx.fillRect(-player.size/2 + 21, -player.size/2 + 9, 10, 10);
+    ctx.fillRect(-player.size/2 + 10, -player.size/2 + 26, 18, 6);
+
+    // Outline
+    ctx.strokeStyle = "rgba(255,255,255,0.25)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-player.size/2, -player.size/2, player.size, player.size);
+
+    ctx.restore();
+  }
+
+  function drawObstacle(o) {
+    // Spike triangle
+    ctx.save();
+    ctx.translate(o.x, o.y);
+
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(o.w/2, -o.h);
+    ctx.lineTo(o.w, 0);
+    ctx.closePath();
+
+    ctx.fillStyle = "#ff5a7a";
+    ctx.fill();
+
+    ctx.strokeStyle = "rgba(255,255,255,0.25)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  function loop(tNow) {
+    if (!running) return;
+
+    const dt = Math.min(0.033, (tNow - tLast) / 1000);
+    tLast = tNow;
+
+    // Update speed multiplier gradually with score
+    speedMul = 1.0 + Math.min(1.8, score / 1400);
+    $speed.textContent = speedMul.toFixed(1) + "×";
+
+    // Spawn obstacles
+    spawnTimer -= dt;
+    if (spawnTimer <= 0) spawnObstacle();
+
+    // Update player physics
+    player.vy += physics.gravity * dt;
+    player.y += player.vy * dt;
+
+    if (player.y >= groundY) {
+      player.y = groundY;
+      player.vy = 0;
+      player.onGround = true;
+      player.rot = 0;
+    } else {
+      player.onGround = false;
+      // rotate while in air
+      player.rot += (Math.PI * 2) * dt * 1.4;
+    }
+
+    // Update obstacles
+    const spd = baseSpeed * speedMul;
+    for (const o of obstacles) o.x -= spd * dt;
+
+    // Remove offscreen
+    obstacles = obstacles.filter(o => o.x + o.w > -20);
+
+    // Collision check
+    for (const o of obstacles) {
+      if (aabbCollision(player.x, player.y, player.size, o.x, o.y, o.w, o.h)) {
+        end();
+        break;
+      }
+    }
+
+    // Score
+    score += Math.floor(60 * dt); // ~60 pts/sec
+    $score.textContent = String(score);
+
+    // Render
+    drawBackground(dt);
+
+    // Obstacles
+    for (const o of obstacles) drawObstacle(o);
+
+    // Player
+    drawPlayer();
+
+    // Overlays
+    if (gameOver) {
+      ctx.fillStyle = "rgba(0,0,0,0.55)";
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.fillStyle = "#eaf0ff";
+      ctx.textAlign = "center";
+      ctx.font = "700 46px system-ui";
+      ctx.fillText("GAME OVER", W/2, H/2 - 20);
+
+      ctx.font = "500 18px system-ui";
+      ctx.fillStyle = "rgba(234,240,255,0.85)";
+      ctx.fillText("Pulsa ESPACIO / ↑ / toca para reiniciar", W/2, H/2 + 26);
+      ctx.fillText(`Puntos: ${score}  ·  Mejor: ${best}`, W/2, H/2 + 56);
+    } else if (!running) {
+      // (not used: running true while loop)
+    }
+
+    if (running) requestAnimationFrame(loop);
+  }
+
+  // Inputs
+  window.addEventListener("keydown", (e) => {
+    if (e.code === "Space" || e.code === "ArrowUp") {
+      e.preventDefault();
+      if (gameOver) { reset(); start(); }
+      else jump();
+    }
+    if (e.code === "KeyR") { reset(); start(); }
+  }, { passive: false });
+
+  canvas.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    if (gameOver) { reset(); start(); }
+    else jump();
+  }, { passive: false });
+
+  btnStart.addEventListener("click", () => start());
+  btnRestart.addEventListener("click", () => { reset(); start(); });
+  btnMute.addEventListener("click", () => {
+    muted = !muted;
+    btnMute.textContent = muted ? "🔇 Sonido: OFF" : "🔊 Sonido: ON";
+    if (!muted) beep(880, 0.06, "triangle", 0.02);
+  });
+
+  // First paint
+  reset();
+  drawBackground(0);
+  drawPlayer();
+
+  // Helpful message on canvas
+  ctx.fillStyle = "rgba(234,240,255,0.65)";
+  ctx.font = "600 20px system-ui";
+  ctx.textAlign = "center";
+  ctx.fillText("Pulsa ESPACIO / ↑ o toca para empezar", W/2, H*0.22);
+
+})();
+</script>
+</body>
+</html>
