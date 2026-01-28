@@ -189,13 +189,13 @@
 
   // Jump feels: buffer + coyote time (cero delay)
   const jump = {
-    gravity: 2600,
-    jumpVel: -900,
+    gravity: 1700,
+    jumpVel: -650,
     // buffer: si pulsas un poco antes de tocar suelo, salta igualmente
-    bufferTime: 0.10,
+    bufferTime: 0.12,
     buffer: 0,
     // coyote: si sales del suelo, aún puedes saltar un pelín
-    coyoteTime: 0.09,
+    coyoteTime: 0.10,
     coyote: 0
   };
 
@@ -207,7 +207,7 @@
     {
       name: "Nivel 1 — Fácil",
       desc: "Aprende ritmo básico. Espacios amplios, nada imposible.",
-      speed: 520,
+      speed: 340,
       length: 2600,
       obstacles: [
         // x, type, size
@@ -226,7 +226,7 @@
     {
       name: "Nivel 2 — Medio",
       desc: "Más ritmo. Doble pincho y bloques más seguidos, pero jugable.",
-      speed: 560,
+      speed: 340,
       length: 3200,
       obstacles: [
         {type:"spike", x: 420, w:36, h:36},
@@ -250,7 +250,7 @@
     {
       name: "Nivel 3 — Difícil (justo)",
       desc: "Ritmo rápido. Requiere timing, pero sin saltos imposibles.",
-      speed: 610,
+      speed:360,
       length: 3800,
       obstacles: [
         {type:"spike", x: 420, w:36, h:36},
