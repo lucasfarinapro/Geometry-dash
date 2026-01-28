@@ -3,73 +3,119 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Dash Mini — Juego tipo Geometry Dash (HTML)</title>
+  <title>Dash Pro — niveles tipo Geometry Dash</title>
   <style>
-    :root { --bg:#0b1020; --fg:#eaf0ff; --muted:#9fb0d0; --accent:#7cf7c7; --danger:#ff5a7a; }
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    body { margin:0; background: radial-gradient(1200px 600px at 50% 0%, #15234a 0%, var(--bg) 55%, #050816 100%); color:var(--fg); }
-    .wrap { max-width: 920px; margin: 0 auto; padding: 18px; }
-    header { display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap: wrap; }
-    h1 { font-size: 18px; margin:0; letter-spacing:.2px; }
-    .pill { display:flex; gap:10px; align-items:center; padding:10px 12px; border:1px solid rgba(255,255,255,.12); border-radius: 12px; background: rgba(0,0,0,.25); }
-    .pill b { color: var(--accent); }
-    .btns { display:flex; gap:10px; flex-wrap: wrap; }
-    button {
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.06);
-      color: var(--fg);
-      padding:10px 12px;
-      border-radius: 12px;
-      cursor:pointer;
-      font-weight:600;
+    :root{
+      --bg:#070a18; --panel:rgba(0,0,0,.45); --stroke:rgba(255,255,255,.14);
+      --fg:#eaf0ff; --muted:#9fb0d0; --accent:#7cf7c7; --danger:#ff5a7a; --warn:#ffd166;
     }
-    button:hover { background: rgba(255,255,255,.10); }
-    button:active { transform: translateY(1px); }
-    .hint { color: var(--muted); font-size: 13px; margin-top: 6px; }
-    canvas {
-      width: 100%;
-      height: auto;
-      aspect-ratio: 16 / 9;
-      border-radius: 16px;
-      border:1px solid rgba(255,255,255,.12);
-      background: linear-gradient(#0b1330, #070a18);
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    body{
+      margin:0; color:var(--fg);
+      background: radial-gradient(1100px 700px at 50% 0%, #162a55 0%, var(--bg) 60%, #040614 100%);
+      min-height:100vh; display:flex; align-items:center; justify-content:center;
+    }
+    .wrap{width:min(980px,96vw); padding:14px}
+    header{display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+    h1{margin:0; font-size:18px; letter-spacing:.2px}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    button{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      color:var(--fg);
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:700;
+    }
+    button:hover{background:rgba(255,255,255,.1)}
+    button:active{transform:translateY(1px)}
+    .pill{
+      display:flex; gap:14px; align-items:center; padding:10px 12px;
+      border:1px solid var(--stroke); border-radius:12px; background:var(--panel);
+    }
+    .pill b{color:var(--accent)}
+    .hint{color:var(--muted); font-size:13px}
+    canvas{
+      width:100%;
+      aspect-ratio: 16/9;
+      border-radius:16px;
+      border:1px solid var(--stroke);
+      background: linear-gradient(#0a1230,#060715);
       display:block;
-      margin-top: 14px;
+      margin-top:12px;
       box-shadow: 0 20px 80px rgba(0,0,0,.45);
       touch-action: manipulation;
     }
-    .footer { display:flex; justify-content:space-between; gap:10px; flex-wrap: wrap; margin-top: 10px; color: var(--muted); font-size: 12px; }
-    .kbd { padding: 2px 8px; border:1px solid rgba(255,255,255,.18); border-bottom-width:3px; border-radius: 8px; background: rgba(255,255,255,.06); color:var(--fg); }
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:12px;
+      margin-top:12px;
+    }
+    .panel{
+      border:1px solid var(--stroke); border-radius:16px; background:var(--panel);
+      padding:12px;
+    }
+    .levels{display:grid; grid-template-columns: 1fr; gap:10px}
+    .levelBtn{
+      text-align:left; padding:12px 12px; border-radius:14px;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .tag{font-size:12px; padding:4px 8px; border-radius:999px; border:1px solid var(--stroke); color:var(--muted)}
+    .tag.easy{color:var(--accent)}
+    .tag.mid{color:var(--warn)}
+    .tag.hard{color:var(--danger)}
+    .kbd{padding:2px 8px; border:1px solid rgba(255,255,255,.18); border-bottom-width:3px; border-radius:8px; background:rgba(255,255,255,.06)}
+    @media (max-width:820px){ .grid{grid-template-columns:1fr} }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div>
-        <h1>Dash Mini — runner tipo Geometry Dash</h1>
-        <div class="hint">Salta con <span class="kbd">Espacio</span> / <span class="kbd">↑</span> / toque en pantalla. Evita pinchos. ¡Aguanta lo máximo!</div>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Dash Pro — niveles tipo Geometry Dash</h1>
+      <div class="hint">
+        Saltar: <span class="kbd">Espacio</span> / <span class="kbd">↑</span> / toque · Pausa: <span class="kbd">P</span> · Reiniciar: <span class="kbd">R</span>
       </div>
-      <div class="btns">
-        <button id="btnStart">▶️ Jugar</button>
-        <button id="btnRestart">🔄 Reiniciar</button>
-        <button id="btnMute">🔊 Sonido: ON</button>
-      </div>
-    </header>
+    </div>
+    <div class="row">
+      <button id="btnMenu">🏠 Menú</button>
+      <button id="btnPause">⏸️ Pausa</button>
+      <button id="btnRestart">🔄 Reiniciar</button>
+    </div>
+  </header>
 
-    <div class="pill" aria-live="polite">
-      <div>Puntos: <b id="score">0</b></div>
-      <div>Mejor: <b id="best">0</b></div>
-      <div>Velocidad: <b id="speed">1.0×</b></div>
-      <div>Estado: <b id="state">LISTO</b></div>
+  <div class="pill" aria-live="polite">
+    <div>Nivel: <b id="uiLevel">—</b></div>
+    <div>Progreso: <b id="uiProg">0%</b></div>
+    <div>Intentos: <b id="uiTry">0</b></div>
+    <div>Estado: <b id="uiState">MENÚ</b></div>
+  </div>
+
+  <canvas id="game" width="960" height="540"></canvas>
+
+  <div class="grid">
+    <div class="panel">
+      <b>📍 Selector de niveles</b>
+      <div class="hint" style="margin-top:6px">
+        Cada nivel está diseñado para que los saltos sean posibles: hay margen, no “trampas” por delay, y el salto responde rápido.
+      </div>
+      <div class="levels" id="levels" style="margin-top:10px"></div>
     </div>
 
-    <canvas id="game" width="960" height="540"></canvas>
-
-    <div class="footer">
-      <div>Tip: si mantienes pulsado, no es “vuelo” — solo un salto. (Como en el original 😄)</div>
-      <div>Hecho en HTML/Canvas. Puedes tunear colores, gravedad, obstáculos y música.</div>
+    <div class="panel">
+      <b>⚙️ Ajustes rápidos</b>
+      <div class="hint" style="margin-top:6px">Si lo notas “duro”, baja la velocidad del nivel o sube el “buffer”.</div>
+      <div style="margin-top:10px; display:grid; gap:10px">
+        <label class="hint">Jump Buffer (ms): <b id="uiJB">120</b></label>
+        <input id="jumpBuffer" type="range" min="40" max="220" step="10" value="120">
+        <label class="hint">Coyote Time (ms): <b id="uiCT">90</b></label>
+        <input id="coyoteTime" type="range" min="40" max="200" step="10" value="90">
+      </div>
     </div>
   </div>
+</div>
 
 <script>
 (() => {
@@ -77,227 +123,486 @@
   const ctx = canvas.getContext("2d");
 
   // UI
-  const $score = document.getElementById("score");
-  const $best = document.getElementById("best");
-  const $speed = document.getElementById("speed");
-  const $state = document.getElementById("state");
-  const btnStart = document.getElementById("btnStart");
+  const uiLevel = document.getElementById("uiLevel");
+  const uiProg  = document.getElementById("uiProg");
+  const uiTry   = document.getElementById("uiTry");
+  const uiState = document.getElementById("uiState");
+
+  const btnMenu = document.getElementById("btnMenu");
+  const btnPause = document.getElementById("btnPause");
   const btnRestart = document.getElementById("btnRestart");
-  const btnMute = document.getElementById("btnMute");
 
-  // Hi-score
-  const BEST_KEY = "dashmini_best";
-  let best = Number(localStorage.getItem(BEST_KEY) || 0);
-  $best.textContent = best.toString();
+  const jumpBufferSlider = document.getElementById("jumpBuffer");
+  const coyoteTimeSlider = document.getElementById("coyoteTime");
+  const uiJB = document.getElementById("uiJB");
+  const uiCT = document.getElementById("uiCT");
 
-  // Audio (beeps simples con WebAudio, sin archivos)
-  let audioCtx = null;
-  let muted = false;
-
-  function beep(freq=440, dur=0.06, type="sine", gain=0.03) {
-    if (muted) return;
-    try {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const o = audioCtx.createOscillator();
-      const g = audioCtx.createGain();
-      o.type = type;
-      o.frequency.value = freq;
-      g.gain.value = gain;
-      o.connect(g);
-      g.connect(audioCtx.destination);
-      o.start();
-      o.stop(audioCtx.currentTime + dur);
-    } catch {}
-  }
-
-  function chord() {
-    beep(523.25, 0.07, "triangle", 0.02); // C5
-    beep(659.25, 0.07, "triangle", 0.02); // E5
-    beep(783.99, 0.07, "triangle", 0.02); // G5
-  }
-
-  // Game constants
+  // ----- GAME CONSTANTS
   const W = canvas.width, H = canvas.height;
-  const groundY = Math.floor(H * 0.78);
+  const groundY = Math.floor(H * 0.80);
 
+  // Physics tuned for "no delay"
+  const physics = {
+    gravity: 2600,
+    jumpVel: -900,
+  };
+
+  // Player
   const player = {
-    x: Math.floor(W * 0.18),
+    x: Math.floor(W * 0.22),
     y: groundY,
     size: 38,
     vy: 0,
+    rot: 0,
     onGround: true,
-    rot: 0
   };
 
-  const physics = {
-    gravity: 2200,
-    jumpVel: -820
-  };
+  // Timing helpers
+  let jumpBufferMs = Number(jumpBufferSlider.value);
+  let coyoteTimeMs = Number(coyoteTimeSlider.value);
+  uiJB.textContent = String(jumpBufferMs);
+  uiCT.textContent = String(coyoteTimeMs);
 
-  let running = false;
-  let gameOver = false;
+  jumpBufferSlider.addEventListener("input", () => {
+    jumpBufferMs = Number(jumpBufferSlider.value);
+    uiJB.textContent = String(jumpBufferMs);
+  });
+  coyoteTimeSlider.addEventListener("input", () => {
+    coyoteTimeMs = Number(coyoteTimeSlider.value);
+    uiCT.textContent = String(coyoteTimeMs);
+  });
 
-  let obstacles = [];
-  let tLast = performance.now();
-  let spawnTimer = 0;
+  // ----- LEVELS
+  // Level is built from segments. Each segment has length and spawns obstacles/pads.
+  // Obstacles are positioned on a "track" (worldX). The camera moves by worldSpeed.
+  const LEVELS = [
+    {
+      id: "L1",
+      name: "Nivel 1 — Entrada",
+      diff: "FÁCIL",
+      tag: "easy",
+      speed: 430,
+      musicBPM: 120,
+      segments: [
+        // lengths in px
+        { len: 900, pattern: "intro" },
+        { len: 1100, pattern: "single" },
+        { len: 1200, pattern: "double" },
+        { len: 1100, pattern: "mixedEasy" },
+        { len: 900, pattern: "outro" },
+      ],
+    },
+    {
+      id: "L2",
+      name: "Nivel 2 — Ritmo",
+      diff: "MEDIO",
+      tag: "mid",
+      speed: 520,
+      musicBPM: 135,
+      segments: [
+        { len: 700, pattern: "intro" },
+        { len: 1400, pattern: "double" },
+        { len: 1400, pattern: "tripleSoft" },
+        { len: 1300, pattern: "platforms1" },
+        { len: 900, pattern: "outro" },
+      ],
+    },
+    {
+      id: "L3",
+      name: "Nivel 3 — Reactor",
+      diff: "DIFÍCIL",
+      tag: "hard",
+      speed: 600,
+      musicBPM: 150,
+      segments: [
+        { len: 650, pattern: "intro" },
+        { len: 1600, pattern: "tripleTight" },
+        { len: 1500, pattern: "platforms2" },
+        { len: 1400, pattern: "mixHard" },
+        { len: 900, pattern: "outro" },
+      ],
+    },
+  ];
 
-  let score = 0;
-  let baseSpeed = 420; // px/s
-  let speedMul = 1.0;
+  // Patterns create obstacles with guaranteed spacing.
+  function buildLevel(level) {
+    // worldX grows to the right; player is fixed on screen; camera moves
+    let worldX = 0;
+    const obstacles = [];
+    const platforms = [];
 
-  // Parallax background blocks
+    // Helpers
+    const spike = (x, size=40) => obstacles.push({ type:"spike", x, y: groundY, w:size, h:size });
+    const block = (x, w=70, h=70, yTop=groundY) => obstacles.push({ type:"block", x, y:yTop, w, h });
+    const plat = (x, w=140, y=groundY-110) => platforms.push({ x, y, w, h:18 });
+
+    // Safety spacing rules
+    const minGap = 170; // minimum world distance between lethal obstacles (base)
+    const safeGap = (mul=1) => Math.floor(minGap * mul);
+
+    for (const seg of level.segments) {
+      const start = worldX;
+      const end = worldX + seg.len;
+
+      const pat = seg.pattern;
+
+      if (pat === "intro") {
+        // Very light
+        spike(start + 520, 38);
+        spike(start + 520 + safeGap(1.2), 38);
+      }
+
+      if (pat === "single") {
+        let x = start + 260;
+        while (x < end - 160) {
+          spike(x, 40);
+          x += safeGap(1.25) + Math.random()*120;
+        }
+      }
+
+      if (pat === "double") {
+        let x = start + 240;
+        while (x < end - 200) {
+          spike(x, 40);
+          spike(x + 52, 40); // double spike
+          x += safeGap(1.45) + Math.random()*110;
+        }
+      }
+
+      if (pat === "mixedEasy") {
+        let x = start + 260;
+        while (x < end - 260) {
+          const r = Math.random();
+          if (r < 0.55) spike(x, 40);
+          else { spike(x, 40); spike(x+52, 40); }
+          x += safeGap(1.5) + Math.random()*120;
+        }
+      }
+
+      if (pat === "tripleSoft") {
+        let x = start + 260;
+        while (x < end - 320) {
+          spike(x, 40); spike(x+52, 40); spike(x+104, 40);
+          x += safeGap(1.75) + Math.random()*120;
+        }
+      }
+
+      if (pat === "tripleTight") {
+        let x = start + 250;
+        while (x < end - 360) {
+          // alternating triple + block to vary
+          spike(x, 40); spike(x+52, 40); spike(x+104, 40);
+          if (Math.random() > 0.55) block(x + 250, 70, 70, groundY); // jump over
+          x += safeGap(1.55) + Math.random()*90;
+        }
+      }
+
+      if (pat === "platforms1") {
+        // Platforms above ground; place blocks on ground with wider gaps.
+        let x = start + 240;
+        while (x < end - 260) {
+          plat(x, 170, groundY - 120);
+          // spike on ground under platform (optional)
+          if (Math.random() > 0.35) spike(x + 210, 38);
+          x += 420 + Math.random()*160;
+        }
+      }
+
+      if (pat === "platforms2") {
+        // Harder platforms: alternating heights + blocks.
+        let x = start + 220;
+        let toggle = false;
+        while (x < end - 320) {
+          plat(x, 160, toggle ? groundY - 155 : groundY - 105);
+          if (Math.random() > 0.55) block(x + 190, 70, 90, groundY);
+          toggle = !toggle;
+          x += 390 + Math.random()*140;
+        }
+      }
+
+      if (pat === "mixHard") {
+        let x = start + 230;
+        while (x < end - 360) {
+          const r = Math.random();
+          if (r < 0.33) { spike(x,40); spike(x+52,40); }
+          else if (r < 0.66) { spike(x,40); spike(x+52,40); spike(x+104,40); }
+          else { block(x, 70, 90, groundY); }
+          x += safeGap(1.55) + Math.random()*110;
+        }
+      }
+
+      if (pat === "outro") {
+        spike(start + 400, 40);
+      }
+
+      worldX = end;
+    }
+
+    // Sort by x
+    obstacles.sort((a,b)=>a.x-b.x);
+    platforms.sort((a,b)=>a.x-b.x);
+
+    return {
+      totalLen: worldX,
+      obstacles,
+      platforms
+    };
+  }
+
+  // ----- GAME STATE
+  const State = { MENU:"MENU", PLAY:"PLAY", PAUSE:"PAUSE", OVER:"OVER" };
+  let state = State.MENU;
+
+  let currentLevel = LEVELS[0];
+  let levelData = buildLevel(currentLevel);
+
+  let tries = 0;
+  let worldScroll = 0;   // how far we've progressed (camera)
+  let worldSpeed = currentLevel.speed;
+
+  // jump assist timing
+  let timeSinceGroundMs = 0;
+  let jumpQueuedMs = 999999;
+
+  // Background stars
   const stars = Array.from({length: 90}, () => ({
-    x: Math.random() * W,
-    y: Math.random() * (H * 0.6),
-    r: Math.random() * 1.6 + 0.2,
-    s: Math.random() * 30 + 10
+    x: Math.random()*W, y: Math.random()*(H*0.6), r: Math.random()*1.8+0.2, s: Math.random()*34+10
   }));
 
-  function reset() {
-    obstacles = [];
+  // ----- AUDIO (simple)
+  let audioCtx = null;
+  function beep(freq=440, dur=0.05, type="square", gain=0.02) {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = type; o.frequency.value = freq;
+      g.gain.value = gain;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(); o.stop(audioCtx.currentTime + dur);
+    } catch {}
+  }
+
+  // ----- UI levels
+  const levelsDiv = document.getElementById("levels");
+  function renderLevels() {
+    levelsDiv.innerHTML = "";
+    for (const lvl of LEVELS) {
+      const b = document.createElement("button");
+      b.className = "levelBtn";
+      b.innerHTML = `<span><b>${lvl.name}</b><div class="hint">${lvl.id} · Velocidad ${lvl.speed}</div></span>
+                     <span class="tag ${lvl.tag}">${lvl.diff}</span>`;
+      b.addEventListener("click", () => selectLevel(lvl.id));
+      levelsDiv.appendChild(b);
+    }
+  }
+
+  function selectLevel(id) {
+    const lvl = LEVELS.find(x => x.id === id) || LEVELS[0];
+    currentLevel = lvl;
+    levelData = buildLevel(currentLevel);
+    resetRun(true);
+    state = State.MENU;
+    syncUI();
+    beep(880,0.05,"triangle",0.02);
+  }
+
+  function resetRun(newLevel=false) {
+    worldScroll = 0;
+    worldSpeed = currentLevel.speed;
+
     player.y = groundY;
     player.vy = 0;
-    player.onGround = true;
     player.rot = 0;
+    player.onGround = true;
 
-    score = 0;
-    speedMul = 1.0;
-    spawnTimer = 0;
+    timeSinceGroundMs = 0;
+    jumpQueuedMs = 999999;
 
-    gameOver = false;
-    $score.textContent = "0";
-    $speed.textContent = "1.0×";
-    $state.textContent = "LISTO";
+    if (!newLevel) tries++;
+    syncUI();
   }
 
-  function start() {
-    if (!running) {
-      running = true;
-      tLast = performance.now();
-      $state.textContent = "JUGANDO";
-      chord();
-      requestAnimationFrame(loop);
-    }
+  function startRun() {
+    if (state === State.PLAY) return;
+    if (state === State.OVER) resetRun(false);
+    if (state === State.MENU) tries++;
+    state = State.PLAY;
+    syncUI();
+    beep(660,0.06,"triangle",0.02);
   }
 
-  function end() {
-    gameOver = true;
-    running = false;
-    $state.textContent = "GAME OVER";
-    beep(220, 0.12, "sawtooth", 0.03);
-    beep(170, 0.16, "sawtooth", 0.03);
-
-    if (score > best) {
-      best = score;
-      localStorage.setItem(BEST_KEY, String(best));
-      $best.textContent = String(best);
-      chord();
-    }
+  function togglePause() {
+    if (state === State.PLAY) state = State.PAUSE;
+    else if (state === State.PAUSE) state = State.PLAY;
+    syncUI();
+    beep(330,0.04,"sine",0.015);
   }
 
-  function jump() {
-    if (gameOver) return;
-    if (!running) start();
-    if (player.onGround) {
+  function gameOver() {
+    state = State.OVER;
+    syncUI();
+    beep(220,0.12,"sawtooth",0.03);
+    beep(170,0.16,"sawtooth",0.03);
+  }
+
+  function syncUI() {
+    uiLevel.textContent = `${currentLevel.id} (${currentLevel.diff})`;
+    uiTry.textContent = String(tries);
+    uiState.textContent = state;
+
+    const prog = Math.max(0, Math.min(100, (worldScroll / levelData.totalLen) * 100));
+    uiProg.textContent = `${prog.toFixed(0)}%`;
+  }
+
+  // ----- COLLISIONS
+  function aabb(ax, ay, aw, ah, bx, by, bw, bh) {
+    return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+  }
+
+  function playerRect() {
+    // Player is drawn centered-ish; for collision use top-left rect
+    return {
+      x: player.x,
+      y: player.y - player.size,
+      w: player.size,
+      h: player.size
+    };
+  }
+
+  // ----- INPUT (NO DELAY): jump buffer + coyote time
+  function queueJump() {
+    if (state === State.MENU) startRun();
+    if (state === State.OVER) { resetRun(false); startRun(); return; }
+    if (state !== State.PLAY) return;
+    jumpQueuedMs = 0; // queue
+  }
+
+  function doJumpIfPossible() {
+    // can jump if onGround OR within coyote window
+    const can = player.onGround || timeSinceGroundMs <= coyoteTimeMs;
+    const queued = jumpQueuedMs <= jumpBufferMs;
+    if (can && queued) {
       player.vy = physics.jumpVel;
       player.onGround = false;
-      beep(660, 0.05, "square", 0.02);
-    } else {
-      // no doble salto (como en muchos niveles clásicos)
-      beep(330, 0.03, "sine", 0.01);
+      timeSinceGroundMs = coyoteTimeMs + 999; // consume coyote
+      jumpQueuedMs = 999999; // consume buffer
+      beep(740,0.04,"square",0.02);
     }
   }
 
-  function spawnObstacle() {
-    // Obstáculo tipo pincho (triángulo)
-    const size = 36 + Math.random() * 22;
-    const gap = 120 + Math.random() * 260;
-    const speed = baseSpeed * speedMul;
+  window.addEventListener("keydown", (e) => {
+    if (e.code === "Space" || e.code === "ArrowUp") { e.preventDefault(); queueJump(); }
+    if (e.code === "KeyP") { e.preventDefault(); togglePause(); }
+    if (e.code === "KeyR") { e.preventDefault(); resetRun(false); state = State.PLAY; syncUI(); }
+  }, { passive:false });
 
-    // Aleatoriza patrón: a veces doble, a veces triple
-    const pattern = Math.random();
-    let count = 1;
-    if (pattern > 0.78) count = 3;
-    else if (pattern > 0.55) count = 2;
+  canvas.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    queueJump();
+  }, { passive:false });
 
-    for (let i = 0; i < count; i++) {
-      obstacles.push({
-        x: W + i * (size * 1.15),
-        y: groundY,
-        w: size,
-        h: size,
-        speed
-      });
-    }
+  btnMenu.addEventListener("click", () => { state = State.MENU; syncUI(); });
+  btnPause.addEventListener("click", () => togglePause());
+  btnRestart.addEventListener("click", () => { resetRun(false); state = State.PLAY; syncUI(); });
 
-    spawnTimer = gap / (baseSpeed * speedMul); // segundos aprox hasta próximo spawn
-  }
-
-  function aabbCollision(px, py, ps, ox, oy, ow, oh) {
-    return (
-      px < ox + ow &&
-      px + ps > ox &&
-      py < oy &&
-      py + ps > oy - oh
-    );
-  }
-
+  // ----- RENDER
   function drawBackground(dt) {
-    // Stars
     ctx.fillStyle = "#070a18";
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0,0,W,H);
 
-    ctx.fillStyle = "rgba(234,240,255,0.8)";
+    ctx.fillStyle = "rgba(234,240,255,0.75)";
     for (const st of stars) {
       st.x -= st.s * dt;
-      if (st.x < -5) st.x = W + Math.random() * 40;
-      ctx.beginPath();
-      ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
-      ctx.fill();
+      if (st.x < -5) st.x = W + Math.random()*40;
+      ctx.beginPath(); ctx.arc(st.x, st.y, st.r, 0, Math.PI*2); ctx.fill();
     }
 
-    // Horizon glow
-    const grd = ctx.createLinearGradient(0, groundY - 160, 0, groundY + 160);
-    grd.addColorStop(0, "rgba(124,247,199,0.12)");
-    grd.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, groundY - 180, W, 360);
+    const g = ctx.createLinearGradient(0, groundY-170, 0, groundY+160);
+    g.addColorStop(0, "rgba(124,247,199,0.10)");
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, groundY-190, W, 380);
 
-    // Ground line
+    // ground
     ctx.strokeStyle = "rgba(255,255,255,0.12)";
     ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, groundY + 1);
-    ctx.lineTo(W, groundY + 1);
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, groundY+1); ctx.lineTo(W, groundY+1); ctx.stroke();
 
-    // Ground tiles
-    const tileW = 46;
-    const move = (performance.now() / 1000) * (baseSpeed * speedMul) * 0.35;
+    // tiles
+    const tileW = 44;
+    const move = (worldScroll * 0.35) % tileW;
     ctx.fillStyle = "rgba(255,255,255,0.06)";
-    for (let x = -tileW; x < W + tileW; x += tileW) {
-      const xx = x - (move % tileW);
-      ctx.fillRect(xx, groundY + 6, tileW - 6, 10);
+    for (let x=-tileW; x<W+tileW; x+=tileW) {
+      ctx.fillRect(x - move, groundY+6, tileW-6, 10);
+    }
+  }
+
+  function drawPlatforms() {
+    ctx.fillStyle = "rgba(124,247,199,0.35)";
+    ctx.strokeStyle = "rgba(255,255,255,0.18)";
+    ctx.lineWidth = 2;
+    for (const p of levelData.platforms) {
+      const sx = p.x - worldScroll;
+      if (sx < -200 || sx > W+200) continue;
+      ctx.fillRect(sx, p.y, p.w, p.h);
+      ctx.strokeRect(sx, p.y, p.w, p.h);
+    }
+  }
+
+  function drawObstacle(o) {
+    const sx = o.x - worldScroll;
+    if (sx < -200 || sx > W+200) return;
+
+    if (o.type === "spike") {
+      ctx.save();
+      ctx.translate(sx, o.y);
+
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(o.w/2, -o.h);
+      ctx.lineTo(o.w, 0);
+      ctx.closePath();
+
+      ctx.fillStyle = "#ff5a7a";
+      ctx.fill();
+
+      ctx.strokeStyle = "rgba(255,255,255,0.25)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.restore();
+      return;
+    }
+
+    if (o.type === "block") {
+      ctx.fillStyle = "rgba(255,209,102,0.28)";
+      ctx.strokeStyle = "rgba(255,255,255,0.20)";
+      ctx.lineWidth = 2;
+      // block sits on ground: use rect from groundY-h
+      const topY = o.y - o.h;
+      ctx.fillRect(sx, topY, o.w, o.h);
+      ctx.strokeRect(sx, topY, o.w, o.h);
+      return;
     }
   }
 
   function drawPlayer() {
-    // Player cube with rotation in air
+    const cx = player.x + player.size/2;
+    const cy = player.y - player.size/2;
+
     ctx.save();
-    ctx.translate(player.x + player.size/2, player.y - player.size/2);
+    ctx.translate(cx, cy);
     ctx.rotate(player.rot);
 
-    // Body
     ctx.fillStyle = "#7cf7c7";
     ctx.fillRect(-player.size/2, -player.size/2, player.size, player.size);
 
-    // Face
     ctx.fillStyle = "rgba(0,0,0,0.35)";
     ctx.fillRect(-player.size/2 + 7, -player.size/2 + 9, 10, 10);
     ctx.fillRect(-player.size/2 + 21, -player.size/2 + 9, 10, 10);
     ctx.fillRect(-player.size/2 + 10, -player.size/2 + 26, 18, 6);
 
-    // Outline
     ctx.strokeStyle = "rgba(255,255,255,0.25)";
     ctx.lineWidth = 2;
     ctx.strokeRect(-player.size/2, -player.size/2, player.size, player.size);
@@ -305,141 +610,144 @@
     ctx.restore();
   }
 
-  function drawObstacle(o) {
-    // Spike triangle
-    ctx.save();
-    ctx.translate(o.x, o.y);
+  function drawOverlay() {
+    ctx.textAlign = "center";
 
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(o.w/2, -o.h);
-    ctx.lineTo(o.w, 0);
-    ctx.closePath();
+    if (state === State.MENU) {
+      ctx.fillStyle = "rgba(0,0,0,0.55)";
+      ctx.fillRect(0,0,W,H);
 
-    ctx.fillStyle = "#ff5a7a";
-    ctx.fill();
+      ctx.fillStyle = "#eaf0ff";
+      ctx.font = "800 44px system-ui";
+      ctx.fillText("DASH PRO", W/2, H*0.40);
 
-    ctx.strokeStyle = "rgba(255,255,255,0.25)";
-    ctx.lineWidth = 2;
-    ctx.stroke();
+      ctx.font = "600 16px system-ui";
+      ctx.fillStyle = "rgba(234,240,255,0.85)";
+      ctx.fillText("Elige un nivel abajo y pulsa ESPACIO / ↑ o toca para jugar", W/2, H*0.48);
+      ctx.fillText("Pausa: P · Reinicio: R", W/2, H*0.53);
+    }
 
-    ctx.restore();
+    if (state === State.PAUSE) {
+      ctx.fillStyle = "rgba(0,0,0,0.55)";
+      ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = "#eaf0ff";
+      ctx.font = "800 44px system-ui";
+      ctx.fillText("PAUSA", W/2, H*0.48);
+      ctx.font = "600 16px system-ui";
+      ctx.fillStyle = "rgba(234,240,255,0.85)";
+      ctx.fillText("Pulsa P para continuar", W/2, H*0.56);
+    }
+
+    if (state === State.OVER) {
+      ctx.fillStyle = "rgba(0,0,0,0.55)";
+      ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = "#eaf0ff";
+      ctx.font = "800 44px system-ui";
+      ctx.fillText("GAME OVER", W/2, H*0.46);
+      ctx.font = "600 16px system-ui";
+      ctx.fillStyle = "rgba(234,240,255,0.85)";
+      ctx.fillText("Pulsa ESPACIO / ↑ o toca para reintentar", W/2, H*0.54);
+    }
   }
 
-  function loop(tNow) {
-    if (!running) return;
+  // ----- UPDATE (fixed timestep for stable physics)
+  let last = performance.now();
+  let acc = 0;
+  const step = 1/120; // 120 Hz internal
 
-    const dt = Math.min(0.033, (tNow - tLast) / 1000);
-    tLast = tNow;
+  function update(dt) {
+    if (state !== State.PLAY) return;
 
-    // Update speed multiplier gradually with score
-    speedMul = 1.0 + Math.min(1.8, score / 1400);
-    $speed.textContent = speedMul.toFixed(1) + "×";
+    // queue timers
+    jumpQueuedMs += dt*1000;
 
-    // Spawn obstacles
-    spawnTimer -= dt;
-    if (spawnTimer <= 0) spawnObstacle();
-
-    // Update player physics
+    // physics
     player.vy += physics.gravity * dt;
     player.y += player.vy * dt;
 
+    // platforms / ground collision
+    player.onGround = false;
+
+    // ground
     if (player.y >= groundY) {
       player.y = groundY;
       player.vy = 0;
       player.onGround = true;
-      player.rot = 0;
-    } else {
-      player.onGround = false;
-      // rotate while in air
-      player.rot += (Math.PI * 2) * dt * 1.4;
     }
 
-    // Update obstacles
-    const spd = baseSpeed * speedMul;
-    for (const o of obstacles) o.x -= spd * dt;
+    // platforms (simple: land on top only)
+    const pr = playerRect();
+    for (const p of levelData.platforms) {
+      const sx = p.x - worldScroll;
+      if (sx < -200 || sx > W+200) continue;
 
-    // Remove offscreen
-    obstacles = obstacles.filter(o => o.x + o.w > -20);
+      // platform rect in screen coords
+      const px = sx, py = p.y, pw = p.w, ph = p.h;
 
-    // Collision check
-    for (const o of obstacles) {
-      if (aabbCollision(player.x, player.y, player.size, o.x, o.y, o.w, o.h)) {
-        end();
-        break;
+      // player prev y to detect landing
+      const prevY = (player.y - player.vy*dt) - player.size;
+      const currY = player.y - player.size;
+
+      // If falling and crosses platform top:
+      if (player.vy >= 0) {
+        const playerLeft = pr.x;
+        const playerRight = pr.x + pr.w;
+        const platTop = py;
+        const platLeft = px;
+        const platRight = px + pw;
+
+        const overlapX = (playerRight > platLeft) && (playerLeft < platRight);
+        const crossed = (prevY + pr.h <= platTop) && (currY + pr.h >= platTop);
+
+        if (overlapX && crossed) {
+          player.y = platTop + player.size; // because player.y is bottom
+          player.vy = 0;
+          player.onGround = true;
+        }
       }
     }
 
-    // Score
-    score += Math.floor(60 * dt); // ~60 pts/sec
-    $score.textContent = String(score);
-
-    // Render
-    drawBackground(dt);
-
-    // Obstacles
-    for (const o of obstacles) drawObstacle(o);
-
-    // Player
-    drawPlayer();
-
-    // Overlays
-    if (gameOver) {
-      ctx.fillStyle = "rgba(0,0,0,0.55)";
-      ctx.fillRect(0, 0, W, H);
-
-      ctx.fillStyle = "#eaf0ff";
-      ctx.textAlign = "center";
-      ctx.font = "700 46px system-ui";
-      ctx.fillText("GAME OVER", W/2, H/2 - 20);
-
-      ctx.font = "500 18px system-ui";
-      ctx.fillStyle = "rgba(234,240,255,0.85)";
-      ctx.fillText("Pulsa ESPACIO / ↑ / toca para reiniciar", W/2, H/2 + 26);
-      ctx.fillText(`Puntos: ${score}  ·  Mejor: ${best}`, W/2, H/2 + 56);
-    } else if (!running) {
-      // (not used: running true while loop)
+    // coyote time tracking
+    if (player.onGround) {
+      timeSinceGroundMs = 0;
+      player.rot = 0;
+    } else {
+      timeSinceGroundMs += dt*1000;
+      player.rot += (Math.PI*2) * dt * 1.4;
     }
 
-    if (running) requestAnimationFrame(loop);
-  }
+    // apply buffered jump
+    doJumpIfPossible();
 
-  // Inputs
-  window.addEventListener("keydown", (e) => {
-    if (e.code === "Space" || e.code === "ArrowUp") {
-      e.preventDefault();
-      if (gameOver) { reset(); start(); }
-      else jump();
-    }
-    if (e.code === "KeyR") { reset(); start(); }
-  }, { passive: false });
+    // move world
+    worldScroll += worldSpeed * dt;
 
-  canvas.addEventListener("pointerdown", (e) => {
-    e.preventDefault();
-    if (gameOver) { reset(); start(); }
-    else jump();
-  }, { passive: false });
+    // update progress ui
+    syncUI();
 
-  btnStart.addEventListener("click", () => start());
-  btnRestart.addEventListener("click", () => { reset(); start(); });
-  btnMute.addEventListener("click", () => {
-    muted = !muted;
-    btnMute.textContent = muted ? "🔇 Sonido: OFF" : "🔊 Sonido: ON";
-    if (!muted) beep(880, 0.06, "triangle", 0.02);
-  });
+    // collisions with obstacles (screen space)
+    const r = playerRect();
 
-  // First paint
-  reset();
-  drawBackground(0);
-  drawPlayer();
+    // only test nearby obstacles using sorted list window
+    // (simple approach: scan all but skip offscreen)
+    for (const o of levelData.obstacles) {
+      const sx = o.x - worldScroll;
+      if (sx < -120 || sx > W+140) continue;
 
-  // Helpful message on canvas
-  ctx.fillStyle = "rgba(234,240,255,0.65)";
-  ctx.font = "600 20px system-ui";
-  ctx.textAlign = "center";
-  ctx.fillText("Pulsa ESPACIO / ↑ o toca para empezar", W/2, H*0.22);
+      if (o.type === "spike") {
+        // spike bounding box (slightly forgiving)
+        const bx = sx + 6;
+        const by = o.y - o.h + 6;
+        const bw = o.w - 12;
+        const bh = o.h - 10;
 
-})();
-</script>
-</body>
-</html>
+        if (aabb(r.x, r.y, r.w, r.h, bx, by, bw, bh)) { gameOver(); break; }
+      } else if (o.type === "block") {
+        const topY = o.y - o.h;
+        const bx = sx + 4;
+        const by = topY + 4;
+        const bw = o.w - 8;
+        const bh = o.h - 8;
+        if (aabb(r.x, r.y, r.w, r.h, bx, by, bw, bh)) { gameOver(); break; }
+      }
+   
