@@ -527,13 +527,18 @@
     lastTime: 0,
   };
 
-  const player = {
-    x: 160,
-    y: groundY - 44,
-    w: 44, h: 44,
-    vy: 0,
-    onGround: true,
-    alive: true,
+const player = {
+  x: 160,
+  y: groundY - 44,
+  w: 44,
+  h: 44,
+  vy: 0,
+  onGround: true,
+  alive: true,
+
+  // ORB
+  wantJump: false,
+  canOrb: true
   };
 
   // Ajustes runtime (se pueden cambiar con sliders)
@@ -896,6 +901,21 @@ for (const o of state.level.obstacles) {
 
       for(const o of state.level.obstacles){
         const r = obstacleToWorldRect(o);
+        // ======================
+// ORB (salto extra)
+// ======================
+if (r.type === "orb") {
+  if (rectsOverlap(pWorld, r)) {
+    if (player.wantJump && player.canOrb) {
+      player.vy = -tuning.jump * 1.1;
+      player.onGround = false;
+      player.canOrb = false;
+    }
+  } else {
+    player.canOrb = true;
+  }
+  continue;
+}
 
         // plataformas: si caemos encima, se puede “pisar”
         if(r.type === "platform"){
