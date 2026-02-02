@@ -517,13 +517,14 @@
   let selectedLevelId = null;
 
   btnMenuPlay.onclick = () => {
+  // si no hay nivel seleccionado, usamos el primero
   if (!selectedLevelId) {
-    alert("Selecciona un nivel primero");
-    return;
+    selectedLevelId = LEVELS[0].id;
   }
 
   setLevelById(selectedLevelId);
-  startGame();
+  updateKpis();
+  resetRun();
 };
 
   const W = cv.width, H = cv.height;
