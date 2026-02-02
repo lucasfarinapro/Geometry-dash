@@ -656,10 +656,14 @@ const player = {
     updateKpis();
   }
 
-  function startGame(){
-    if(!state.level) setLevelById(LEVELS[0].id);
-    state.attempts += 1;
-    resetRun();
+ function startGame(){
+  if(!state.level){
+    console.warn("No hay nivel seleccionado");
+    return;
+  }
+  state.attempts += 1;
+  resetRun();
+}
   }
 
   function restart(){
