@@ -774,13 +774,20 @@
       player.prevY = player.y;
       player.vy += tuning.gravity * dt;
       player.y += player.vy * dt;
-      // pinchos: comprobar ANTES del suelo
-const pWorld = { x: player.x + state.camX, y: player.y, w: player.w, h: player.h };
+     // pinchos: matar al pisarlos (Geometry Dash style)
+for (const o of state.level.obstacles) {
+  if (o.type !== "spike") continue;
 
-for(const o of state.level.obstacles){
-  if(o.type !== "spike") continue;
   const r = obstacleToWorldRect(o);
-  if(rectsOverlap(pWorld, r)){
+
+  const overlapX =
+    (player.x + state.camX + player.w) > r.x &&
+    (player.x + state.camX) < r.x + r.w;
+
+  const touchingGround =
+    player.y + player.h >= r.y - 2; // margen de seguridad
+
+  if (overlapX && touchingGround) {
     kill();
     break;
   }
