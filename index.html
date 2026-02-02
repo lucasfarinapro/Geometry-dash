@@ -825,6 +825,13 @@ if (r.type === "block") {
     break;
   }
 }
+        // spike: cualquier contacto = muerte
+if (r.type === "spike") {
+  if (rectsOverlap(pWorld, r)) {
+    kill();
+    break;
+  }
+}
       }
 
       // win
