@@ -513,6 +513,8 @@
   const levelsGrid = document.getElementById("levelsGrid");
   const btnCloseMenu = document.getElementById("btnCloseMenu");
   const btnMenuPlay = document.getElementById("btnMenuPlay");
+  
+  let selectedLevelId = null;
 
   const W = cv.width, H = cv.height;
   const groundY = H - 90;
@@ -552,17 +554,23 @@ const player = {
   //  UI helpers
   // =========================
   function setMode(m){
-    state.mode = m;
-    const map = {
-      MENU: ["MENÚ", "var(--good)"],
-      PLAYING: ["JUGANDO", "var(--good)"],
-      PAUSED: ["PAUSA", "var(--warn)"],
-      WIN: ["VICTORIA", "var(--good)"],
-      DEAD: ["KO", "var(--bad)"],
-    };
-    ui.state.textContent = map[m][0];
-    ui.state.style.color = map[m][1];
+  state.mode = m;
+
+  if (m === "MENU") {
+    renderLevels();
   }
+
+  const map = {
+    MENU: ["MENÚ", "var(--good)"],
+    PLAYING: ["JUGANDO", "var(--good)"],
+    PAUSED: ["PAUSA", "var(--warn)"],
+    WIN: ["VICTORIA", "var(--good)"],
+    DEAD: ["KO", "var(--bad)"],
+  };
+
+  ui.state.textContent = map[m][0];
+  ui.state.style.color = map[m][1];
+}
 
   function updateKpis(){
     ui.attempts.textContent = state.attempts;
