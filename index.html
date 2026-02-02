@@ -3,724 +3,889 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Dash Pro — Niveles + Menú (HTML)</title>
+  <title>Dash Pro — niveles tipo Geometry Dash</title>
   <style>
-    :root { --bg:#0b1020; --fg:#eaf0ff; --muted:#9fb0d0; --acc:#7cf7c7; --danger:#ff5a7a; --panel:rgba(0,0,0,.35); }
-    *{ box-sizing:border-box; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
-    body{ margin:0; color:var(--fg); background:radial-gradient(1200px 600px at 50% 0%, #15234a 0%, var(--bg) 55%, #050816 100%); }
-    .wrap{ max-width:980px; margin:0 auto; padding:16px; }
-    header{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
-    h1{ margin:0; font-size:18px; letter-spacing:.2px; }
-    .hint{ color:var(--muted); font-size:13px; margin-top:6px; }
-    canvas{
-      width:100%;
-      height:auto;
-      aspect-ratio:16/9;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.12);
-      background:linear-gradient(#0b1330, #070a18);
-      display:block;
+    :root{
+      --bg1:#070b1a; --bg2:#0a1330;
+      --panel:#0b1634cc; --stroke:#ffffff22;
+      --text:#e9f0ff; --muted:#b9c8ffcc;
+      --good:#38d39f; --warn:#ffcc66; --bad:#ff5b6e;
+      --btn:#172a5a; --btn2:#1e3a8a;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      color:var(--text);
+      background: radial-gradient(1200px 900px at 20% 10%, #1b2a66 0%, transparent 60%),
+                  radial-gradient(900px 700px at 70% 40%, #17357a 0%, transparent 55%),
+                  linear-gradient(180deg, var(--bg2), var(--bg1));
+      min-height:100vh; display:flex; justify-content:center;
+    }
+    .wrap{width:min(1120px, 96vw); padding:18px 0 26px}
+    header{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:12px 14px; border:1px solid var(--stroke);
+      background:linear-gradient(180deg, #0f1b3bcc, #08102acc);
+      border-radius:14px;
+      box-shadow: 0 10px 35px #00000055;
+    }
+    .title{
+      display:flex; gap:10px; align-items:center;
+      font-weight:800; letter-spacing:.2px;
+    }
+    .title small{display:block; font-weight:600; color:var(--muted); margin-top:2px}
+    .pill{
+      display:inline-flex; gap:10px; align-items:center;
+      padding:8px 10px; border:1px solid var(--stroke);
+      border-radius:999px; background:#0b1634aa;
+      color:var(--muted); font-size:13px;
+    }
+    .pill b{color:var(--text)}
+    .grid{
       margin-top:14px;
-      box-shadow:0 20px 80px rgba(0,0,0,.45);
-      touch-action:manipulation;
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:14px;
     }
-    .hud{
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
-      padding:10px 12px; border:1px solid rgba(255,255,255,.12);
-      border-radius:12px; background:rgba(0,0,0,.25); margin-top:10px;
-      justify-content:space-between;
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
+    .panel{
+      border:1px solid var(--stroke);
+      background:linear-gradient(180deg, #0b1634cc, #07112ccc);
+      border-radius:18px;
+      box-shadow: 0 14px 40px #00000055;
+      overflow:hidden;
     }
-    .hud .left, .hud .right{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
-    .hud b{ color:var(--acc); }
+    .panel h3{
+      margin:0; padding:12px 14px;
+      border-bottom:1px solid var(--stroke);
+      font-size:14px; letter-spacing:.4px; color:var(--muted);
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .panel .body{padding:14px}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    button, select, input[type="range"]{
+      font:inherit;
+    }
     button{
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.06);
-      color:var(--fg);
+      border:1px solid var(--stroke);
+      background:linear-gradient(180deg, var(--btn2), var(--btn));
+      color:var(--text);
       padding:10px 12px;
       border-radius:12px;
       cursor:pointer;
-      font-weight:650;
+      box-shadow: 0 10px 22px #00000055;
     }
-    button:hover{ background: rgba(255,255,255,.10); }
-    button:active{ transform:translateY(1px); }
-    .kbd{ padding:2px 8px; border:1px solid rgba(255,255,255,.18); border-bottom-width:3px; border-radius:8px; background:rgba(255,255,255,.06); }
-    .panel{
-      background:var(--panel);
-      border:1px solid rgba(255,255,255,.12);
-      border-radius:16px;
-      padding:14px;
+    button:hover{filter:brightness(1.08)}
+    button:active{transform:translateY(1px)}
+    button.secondary{
+      background:linear-gradient(180deg, #0f1f49, #0b1533);
     }
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap:12px;
-      margin-top:12px;
+    button.danger{
+      background:linear-gradient(180deg, #a1122c, #5b0d1c);
     }
+    select{
+      border:1px solid var(--stroke);
+      background:#0b1634;
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      min-width: 240px;
+    }
+    .kpi{
+      display:grid; grid-template-columns: repeat(4,1fr);
+      gap:10px; margin-top:10px;
+    }
+    @media (max-width: 560px){ .kpi{grid-template-columns: repeat(2,1fr)} }
     .card{
-      padding:12px;
+      border:1px solid var(--stroke);
+      background:#0b1634aa;
       border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.04);
+      padding:10px 12px;
     }
-    .card h3{ margin:0 0 6px 0; font-size:15px; }
-    .card p{ margin:0; color:var(--muted); font-size:12px; line-height:1.35; }
-    .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
-    .tiny{ font-size:12px; color:var(--muted); }
+    .card .label{color:var(--muted); font-size:12px}
+    .card .value{font-weight:800; font-size:18px; margin-top:4px}
+    .value.good{color:var(--good)}
+    .value.warn{color:var(--warn)}
+    .value.bad{color:var(--bad)}
+    canvas{
+      width:100%; height:520px;
+      background:linear-gradient(180deg, #07112c, #040815);
+      border-radius:16px;
+      display:block;
+      border:1px solid var(--stroke);
+    }
+    .hint{color:var(--muted); font-size:13px; line-height:1.35}
+    .sep{height:1px; background:var(--stroke); margin:12px 0}
+    .control{
+      display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center;
+      margin:10px 0;
+    }
+    .control label{color:var(--muted); font-size:13px}
+    input[type="range"]{width:100%}
+    .mini{
+      font-size:12px; color:var(--muted);
+      border:1px solid var(--stroke);
+      padding:6px 8px; border-radius:10px; background:#0b1634aa;
+      min-width:62px; text-align:center;
+    }
+
+    /* Modal menú */
+    .overlay{
+      position:fixed; inset:0;
+      background:#00000088;
+      display:none;
+      align-items:center; justify-content:center;
+      padding:18px;
+    }
+    .overlay.show{display:flex}
+    .modal{
+      width:min(820px, 96vw);
+      border:1px solid var(--stroke);
+      background:linear-gradient(180deg, #0f1b3bee, #07112cee);
+      border-radius:18px;
+      box-shadow: 0 20px 80px #000000aa;
+      overflow:hidden;
+    }
+    .modal header{
+      border:none; border-radius:0;
+      background:transparent;
+      box-shadow:none;
+      border-bottom:1px solid var(--stroke);
+    }
+    .modal .content{padding:14px}
+    .levels{
+      display:grid; grid-template-columns: repeat(3, 1fr);
+      gap:10px;
+    }
+    @media (max-width: 720px){ .levels{grid-template-columns: 1fr} }
+    .lvl{
+      border:1px solid var(--stroke);
+      background:#0b1634aa;
+      border-radius:14px;
+      padding:12px;
+      cursor:pointer;
+    }
+    .lvl:hover{filter:brightness(1.08)}
+    .lvl h4{margin:0 0 6px 0}
+    .tag{
+      display:inline-block;
+      font-size:12px; color:#0b1634;
+      background:var(--warn);
+      padding:3px 8px; border-radius:999px;
+      font-weight:800;
+      margin-left:8px;
+    }
+    .footerRow{
+      display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;
+      padding:12px 14px; border-top:1px solid var(--stroke);
+      background:#06102aaa;
+    }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size:12px;
+      padding:2px 6px;
+      border:1px solid var(--stroke);
+      border-bottom-color:#00000088;
+      background:#0b1634aa;
+      border-radius:8px;
+      color:var(--muted);
+    }
   </style>
 </head>
+
 <body>
-<div class="wrap">
-  <header>
-    <div>
-      <h1>Dash Pro — Menú + Niveles</h1>
-      <div class="hint">
-        Saltar: <span class="kbd">Espacio</span> / <span class="kbd">↑</span> / toque.
-        Reiniciar: <span class="kbd">R</span>. Pausa: <span class="kbd">P</span>.
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <div style="font-size:18px">⬛ Dash Pro</div>
+        <div>
+          <div style="font-size:14px; font-weight:800">— niveles tipo Geometry Dash</div>
+          <small>Saltar: <span class="kbd">Espacio</span> / <span class="kbd">↑</span> / toque · Pausa: <span class="kbd">P</span> · Menú: <span class="kbd">M</span> · Reiniciar: <span class="kbd">R</span></small>
+        </div>
       </div>
-    </div>
-    <div class="row">
-      <button id="btnMenu">🏠 Menú</button>
-      <button id="btnPause">⏸️ Pausa</button>
-      <button id="btnRestart">🔄 Reiniciar</button>
-      <button id="btnMute">🔊 Sonido: ON</button>
-    </div>
-  </header>
 
-  <div class="hud" id="hud">
-    <div class="left">
-      <div>Nivel: <b id="lvlName">—</b></div>
-      <div>Progreso: <b id="progress">0%</b></div>
-      <div>Intentos: <b id="attempts">0</b></div>
-    </div>
-    <div class="right">
-      <div>Estado: <b id="state">MENÚ</b></div>
-      <div>FPS: <b id="fps">—</b></div>
+      <div class="pill">
+        <span>Nivel: <b id="uiLevelName">—</b></span>
+        <span>Estado: <b id="uiState" style="color:var(--good)">MENÚ</b></span>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="panel">
+        <h3>
+          <span>Juego</span>
+          <div class="row">
+            <button id="btnMenu" class="secondary">🏠 Menú</button>
+            <button id="btnPause" class="secondary">⏸ Pausa</button>
+            <button id="btnRestart" class="danger">↻ Reiniciar</button>
+          </div>
+        </h3>
+        <div class="body">
+          <canvas id="cv" width="1100" height="520"></canvas>
+
+          <div class="kpi">
+            <div class="card">
+              <div class="label">Progreso</div>
+              <div class="value good" id="uiProgress">0%</div>
+            </div>
+            <div class="card">
+              <div class="label">Intentos</div>
+              <div class="value" id="uiAttempts">0</div>
+            </div>
+            <div class="card">
+              <div class="label">Velocidad</div>
+              <div class="value warn" id="uiSpeed">—</div>
+            </div>
+            <div class="card">
+              <div class="label">Gravedad</div>
+              <div class="value warn" id="uiGravity">—</div>
+            </div>
+          </div>
+
+          <div class="sep"></div>
+          <div class="hint">
+            🔧 Ajustes en tiempo real: si “va muy rápido” o “gravedad muy alta”, aquí lo arreglamos sin tocar el motor.<br/>
+            Consejo: para que un nivel sea justo, dejamos **mínimo 1.1–1.4s** entre picos a la misma altura.
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>
+          <span>Ajustes rápidos</span>
+          <span class="hint">sin romper nada</span>
+        </h3>
+        <div class="body">
+          <div class="control">
+            <label>Velocidad del nivel (px/s)</label>
+            <div class="mini" id="uiSpeedBox">340</div>
+            <input id="speedRange" type="range" min="240" max="520" value="340" />
+          </div>
+
+          <div class="control">
+            <label>Gravedad (px/s²)</label>
+            <div class="mini" id="uiGravBox">1650</div>
+            <input id="gravRange" type="range" min="900" max="2600" value="1650" />
+          </div>
+
+          <div class="control">
+            <label>Altura de salto (impulso)</label>
+            <div class="mini" id="uiJumpBox">520</div>
+            <input id="jumpRange" type="range" min="360" max="720" value="520" />
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="row">
+            <select id="levelSelect"></select>
+            <button id="btnPlay">▶ Jugar</button>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="hint">
+            📌 “No encuentro <b>type: spike</b>” → En este motor los obstáculos son objetos con <b>type</b>:
+            <div style="margin-top:6px">
+              - <b>spike</b> = pincho (triángulo) <br/>
+              - <b>block</b> = bloque (cubo) <br/>
+              - <b>platform</b> = plataforma elevada <br/>
+            </div>
+            Si quieres, añadimos después <b>orb</b> (salto extra) y <b>pad</b> (rebote).
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <canvas id="game" width="960" height="540"></canvas>
+  <!-- MENÚ -->
+  <div class="overlay" id="menuOverlay">
+    <div class="modal">
+      <header>
+        <div class="title">
+          <div style="font-size:18px">🏁 Selector de niveles</div>
+          <div>
+            <small>Elige un nivel jugable. Luego tocamos dificultad.</small>
+          </div>
+        </div>
+        <div class="row">
+          <button id="btnCloseMenu" class="secondary">Cerrar</button>
+        </div>
+      </header>
 
-  <div id="menu" class="panel" style="margin-top:12px;">
-    <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:flex-end;">
-      <div>
-        <div style="font-weight:800; font-size:18px;">Selecciona un nivel</div>
-        <div class="tiny">Niveles diseñados para ser jugables. Si quieres, luego creamos editor.</div>
+      <div class="content">
+        <div class="levels" id="levelsGrid"></div>
       </div>
-      <div class="tiny">Tip: si “no salta”, es porque estabas en el aire. Aquí no hay doble salto (modo clásico).</div>
-    </div>
 
-    <div class="grid" id="levelGrid"></div>
-
-    <div class="row" style="margin-top:12px;">
-      <button id="btnPlay">▶️ Jugar nivel</button>
-      <button id="btnHow">❓ Controles</button>
+      <div class="footerRow">
+        <button id="btnMenuPlay">▶ Jugar nivel</button>
+      </div>
     </div>
-    <div class="tiny" id="menuInfo" style="margin-top:8px;"></div>
   </div>
-</div>
 
 <script>
 (() => {
-  // ====== Canvas ======
-  const canvas = document.getElementById("game");
-  const ctx = canvas.getContext("2d");
-  const W = canvas.width, H = canvas.height;
-  const groundY = Math.floor(H * 0.78);
-
-  // ====== UI ======
-  const $lvlName = document.getElementById("lvlName");
-  const $progress = document.getElementById("progress");
-  const $attempts = document.getElementById("attempts");
-  const $state = document.getElementById("state");
-  const $fps = document.getElementById("fps");
-
-  const btnMenu = document.getElementById("btnMenu");
-  const btnPause = document.getElementById("btnPause");
-  const btnRestart = document.getElementById("btnRestart");
-  const btnMute = document.getElementById("btnMute");
-
-  const menuEl = document.getElementById("menu");
-  const gridEl = document.getElementById("levelGrid");
-  const btnPlay = document.getElementById("btnPlay");
-  const btnHow = document.getElementById("btnHow");
-  const menuInfo = document.getElementById("menuInfo");
-
-  // ====== Audio (beeps) ======
-  let audioCtx = null;
-  let muted = false;
-  function beep(freq=440, dur=0.06, type="sine", gain=0.03) {
-    if (muted) return;
-    try {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const o = audioCtx.createOscillator();
-      const g = audioCtx.createGain();
-      o.type = type;
-      o.frequency.value = freq;
-      g.gain.value = gain;
-      o.connect(g); g.connect(audioCtx.destination);
-      o.start(); o.stop(audioCtx.currentTime + dur);
-    } catch {}
-  }
-  function winSound(){ beep(740,0.07,"triangle",0.02); beep(932,0.07,"triangle",0.02); beep(1175,0.09,"triangle",0.02); }
-  function dieSound(){ beep(220,0.12,"sawtooth",0.03); beep(170,0.16,"sawtooth",0.03); }
-
-  // ====== Game state ======
-  let mode = "menu"; // menu | playing | paused | gameover | win
-  let attempts = 0;
-  let levelIndex = 0;
-
-  // Fixed timestep (reduce “va mal”)
-  const FIXED_DT = 1/120; // 120 Hz physics
-  let accumulator = 0;
-  let lastT = performance.now();
-
-  // FPS estimate
-  let fpsAcc = 0, fpsCount = 0, fpsLast = performance.now();
-
-  // ====== Player ======
-  const player = {
-    x: Math.floor(W * 0.22),
-    y: groundY,
-    size: 36,
-    vy: 0,
-    onGround: true,
-    rot: 0
-  };
-
-  // Jump feels: buffer + coyote time (cero delay)
-  const jump = {
-    gravity: 1700,
-    jumpVel: -650,
-    // buffer: si pulsas un poco antes de tocar suelo, salta igualmente
-    bufferTime: 0.12,
-    buffer: 0,
-    // coyote: si sales del suelo, aún puedes saltar un pelín
-    coyoteTime: 0.10,
-    coyote: 0
-  };
-
-  // ====== Level format ======
-  // We'll use an array of "segments" placed along X.
-  // Each obstacle: {type:'spike'|'block', x, w, h}
-  // All obstacles sit on ground (for now) like classic beginner GD.
-  const levels = [
+  // =========================
+  //  NIVELES (jugables)
+  // =========================
+  const LEVELS = [
     {
+      id: "easy-1",
       name: "Nivel 1 — Fácil",
-      desc: "Aprende ritmo básico. Espacios amplios, nada imposible.",
+      diff: "FÁCIL",
+      desc: "Ritmo básico. Espacios amplios. Nada imposible.",
       speed: 340,
+      gravity: 1650,
+      jump: 520,
       length: 2600,
       obstacles: [
-        // x, type, size
-        {type:"spike", x: 420, w:36, h:36},
-        {type:"spike", x: 700, w:36, h:36},
-        {type:"block", x: 960, w:54, h:54},
-        {type:"spike", x: 1150, w:36, h:36},
-        {type:"spike", x: 1350, w:36, h:36},
-        {type:"block", x: 1600, w:54, h:54},
-        {type:"spike", x: 1780, w:36, h:36},
-        {type:"spike", x: 1950, w:36, h:36},
-        {type:"block", x: 2180, w:54, h:54},
-        {type:"spike", x: 2360, w:36, h:36},
+        // suelo: y = groundY
+        {type:"spike", x: 520, w:36, h:36},
+        {type:"block", x: 860, w:54, h:54},
+        {type:"spike", x: 1180, w:36, h:36},
+        {type:"spike", x: 1450, w:36, h:36},
+        {type:"block", x: 1750, w:54, h:54},
+        {type:"spike", x: 2120, w:36, h:36},
       ]
     },
     {
-      name: "Nivel 2 — Medio",
-      desc: "Más ritmo. Doble pincho y bloques más seguidos, pero jugable.",
-      speed: 340,
+      id: "easy-2",
+      name: "Nivel 2 — Fácil+",
+      diff: "FÁCIL",
+      desc: "Añade plataformas y combos suaves.",
+      speed: 360,
+      gravity: 1700,
+      jump: 540,
       length: 3200,
       obstacles: [
-        {type:"spike", x: 420, w:36, h:36},
-        {type:"spike", x: 600, w:36, h:36},
-        {type:"block", x: 820, w:54, h:54},
-        {type:"spike", x: 1040, w:36, h:36},
-        {type:"spike", x: 1100, w:36, h:36},
-        {type:"block", x: 1320, w:54, h:54},
-        {type:"block", x: 1460, w:54, h:54},
-        {type:"spike", x: 1660, w:36, h:36},
-        {type:"spike", x: 1860, w:36, h:36},
-        {type:"spike", x: 1920, w:36, h:36},
-        {type:"block", x: 2120, w:54, h:54},
-        {type:"spike", x: 2320, w:36, h:36},
-        {type:"block", x: 2520, w:54, h:54},
-        {type:"spike", x: 2720, w:36, h:36},
-        {type:"spike", x: 2780, w:36, h:36},
-        {type:"block", x: 2940, w:54, h:54},
+        {type:"spike", x: 520, w:36, h:36},
+        {type:"block", x: 900, w:54, h:54},
+        {type:"platform", x: 1240, w:240, h:22, yOffset: -120},
+        {type:"spike", x: 1560, w:36, h:36},
+        {type:"spike", x: 1800, w:36, h:36},
+        {type:"block", x: 2100, w:54, h:54},
+        {type:"platform", x: 2460, w:260, h:22, yOffset: -170},
+        {type:"spike", x: 2800, w:36, h:36},
       ]
     },
     {
-      name: "Nivel 3 — Difícil (justo)",
-      desc: "Ritmo rápido. Requiere timing, pero sin saltos imposibles.",
-      speed:360,
-      length: 3800,
+      id: "mid-1",
+      name: "Nivel 3 — Medio",
+      diff: "MEDIO",
+      desc: "Ritmo más rápido. Requiere timing (pero justo).",
+      speed: 400,
+      gravity: 1800,
+      jump: 560,
+      length: 3600,
       obstacles: [
-        {type:"spike", x: 420, w:36, h:36},
-        {type:"block", x: 620, w:54, h:54},
+        {type:"spike", x: 520, w:36, h:36},
         {type:"spike", x: 820, w:36, h:36},
-        {type:"spike", x: 880, w:36, h:36},
-        {type:"block", x: 1040, w:54, h:54},
-        {type:"block", x: 1180, w:54, h:54},
-        {type:"spike", x: 1400, w:36, h:36},
-        {type:"spike", x: 1460, w:36, h:36},
-        {type:"spike", x: 1520, w:36, h:36},
-        {type:"block", x: 1700, w:54, h:54},
-        {type:"spike", x: 1900, w:36, h:36},
-        {type:"block", x: 2060, w:54, h:54},
-        {type:"spike", x: 2260, w:36, h:36},
-        {type:"spike", x: 2320, w:36, h:36},
-        {type:"block", x: 2500, w:54, h:54},
-        {type:"block", x: 2640, w:54, h:54},
-        {type:"spike", x: 2860, w:36, h:36},
-        {type:"spike", x: 2920, w:36, h:36},
-        {type:"spike", x: 2980, w:36, h:36},
-        {type:"block", x: 3200, w:54, h:54},
-        {type:"spike", x: 3420, w:36, h:36},
+        {type:"block", x: 1120, w:54, h:54},
+        {type:"platform", x: 1440, w:220, h:22, yOffset: -140},
+        {type:"spike", x: 1760, w:36, h:36},
+        {type:"block", x: 2050, w:54, h:54},
+        {type:"spike", x: 2300, w:36, h:36},
+        {type:"platform", x: 2620, w:260, h:22, yOffset: -190},
+        {type:"spike", x: 3020, w:36, h:36},
+        {type:"spike", x: 3320, w:36, h:36},
       ]
     }
   ];
 
-  // Convert obstacles to world coordinates and store "scrollX"
-  let scrollX = 0;
+  // =========================
+  //  CANVAS + ESTADO
+  // =========================
+  const cv = document.getElementById("cv");
+  const ctx = cv.getContext("2d");
 
-  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+  const ui = {
+    levelName: document.getElementById("uiLevelName"),
+    state: document.getElementById("uiState"),
+    progress: document.getElementById("uiProgress"),
+    attempts: document.getElementById("uiAttempts"),
+    speed: document.getElementById("uiSpeed"),
+    gravity: document.getElementById("uiGravity"),
+    speedBox: document.getElementById("uiSpeedBox"),
+    gravBox: document.getElementById("uiGravBox"),
+    jumpBox: document.getElementById("uiJumpBox"),
+  };
 
+  const speedRange = document.getElementById("speedRange");
+  const gravRange = document.getElementById("gravRange");
+  const jumpRange = document.getElementById("jumpRange");
+
+  const btnMenu = document.getElementById("btnMenu");
+  const btnPause = document.getElementById("btnPause");
+  const btnRestart = document.getElementById("btnRestart");
+  const btnPlay = document.getElementById("btnPlay");
+
+  const levelSelect = document.getElementById("levelSelect");
+  const overlay = document.getElementById("menuOverlay");
+  const levelsGrid = document.getElementById("levelsGrid");
+  const btnCloseMenu = document.getElementById("btnCloseMenu");
+  const btnMenuPlay = document.getElementById("btnMenuPlay");
+
+  const W = cv.width, H = cv.height;
+  const groundY = H - 90;
+
+  const state = {
+    mode: "MENU", // MENU | PLAYING | PAUSED | WIN | DEAD
+    level: null,
+    attempts: 0,
+    t: 0,              // tiempo
+    camX: 0,           // cámara
+    startedAt: 0,
+    lastTime: 0,
+  };
+
+  const player = {
+    x: 160,
+    y: groundY - 44,
+    w: 44, h: 44,
+    vy: 0,
+    onGround: true,
+    alive: true,
+  };
+
+  // Ajustes runtime (se pueden cambiar con sliders)
+  const tuning = {
+    speed: 340,
+    gravity: 1650,
+    jump: 520,
+  };
+
+  // =========================
+  //  UI helpers
+  // =========================
   function setMode(m){
-    mode = m;
-    if (m === "menu"){
-      menuEl.style.display = "block";
-      $state.textContent = "MENÚ";
-      btnPause.textContent = "⏸️ Pausa";
-    } else {
-      menuEl.style.display = "none";
-    }
-    if (m === "paused") $state.textContent = "PAUSA";
-    if (m === "playing") $state.textContent = "JUGANDO";
-    if (m === "gameover") $state.textContent = "GAME OVER";
-    if (m === "win") $state.textContent = "VICTORIA";
+    state.mode = m;
+    const map = {
+      MENU: ["MENÚ", "var(--good)"],
+      PLAYING: ["JUGANDO", "var(--good)"],
+      PAUSED: ["PAUSA", "var(--warn)"],
+      WIN: ["VICTORIA", "var(--good)"],
+      DEAD: ["KO", "var(--bad)"],
+    };
+    ui.state.textContent = map[m][0];
+    ui.state.style.color = map[m][1];
   }
 
-  function loadLevel(i){
-    levelIndex = clamp(i, 0, levels.length-1);
-    const L = levels[levelIndex];
-    $lvlName.textContent = L.name;
-    menuInfo.textContent = L.desc + `  · Velocidad: ${L.speed} · Longitud: ${L.length}`;
-    drawMenuSelection();
+  function updateKpis(){
+    ui.attempts.textContent = state.attempts;
+    ui.speed.textContent = Math.round(tuning.speed);
+    ui.gravity.textContent = Math.round(tuning.gravity);
+    ui.speedBox.textContent = Math.round(tuning.speed);
+    ui.gravBox.textContent = Math.round(tuning.gravity);
+    ui.jumpBox.textContent = Math.round(tuning.jump);
   }
 
+  function setLevelById(id){
+    const lvl = LEVELS.find(l => l.id === id) || LEVELS[0];
+    state.level = structuredClone(lvl);
+
+    // set tuning defaults for that level
+    tuning.speed = lvl.speed;
+    tuning.gravity = lvl.gravity;
+    tuning.jump = lvl.jump;
+
+    speedRange.value = tuning.speed;
+    gravRange.value = tuning.gravity;
+    jumpRange.value = tuning.jump;
+
+    ui.levelName.textContent = lvl.name;
+    updateKpis();
+  }
+
+  // =========================
+  //  Level select UI
+  // =========================
+  function buildLevelSelect(){
+    levelSelect.innerHTML = "";
+    LEVELS.forEach(l => {
+      const opt = document.createElement("option");
+      opt.value = l.id;
+      opt.textContent = `${l.name} (${l.diff})`;
+      levelSelect.appendChild(opt);
+    });
+  }
+
+  function buildMenuGrid(){
+    levelsGrid.innerHTML = "";
+    LEVELS.forEach(l => {
+      const el = document.createElement("div");
+      el.className = "lvl";
+      el.dataset.id = l.id;
+      el.innerHTML = `
+        <h4>${l.name} <span class="tag">${l.diff}</span></h4>
+        <div style="color:var(--muted); font-size:13px; line-height:1.35">
+          ${l.desc}<br/>
+          <span style="opacity:.9">Vel: <b>${l.speed}</b> · Grav: <b>${l.gravity}</b></span>
+        </div>
+      `;
+      el.addEventListener("click", () => {
+        levelSelect.value = l.id;
+        setLevelById(l.id);
+        highlightSelected();
+      });
+      levelsGrid.appendChild(el);
+    });
+    highlightSelected();
+  }
+
+  function highlightSelected(){
+    const id = levelSelect.value;
+    [...levelsGrid.children].forEach(c => {
+      c.style.outline = (c.dataset.id === id) ? "2px solid #ffffff55" : "none";
+    });
+  }
+
+  // =========================
+  //  Game flow
+  // =========================
   function resetRun(){
-    const L = levels[levelIndex];
-    scrollX = 0;
-    player.y = groundY;
+    state.t = 0;
+    state.camX = 0;
+    player.x = 160;
+    player.y = groundY - player.h;
     player.vy = 0;
     player.onGround = true;
-    player.rot = 0;
-    jump.buffer = 0;
-    jump.coyote = jump.coyoteTime;
-    $progress.textContent = "0%";
+    player.alive = true;
+    setMode("PLAYING");
+    updateKpis();
   }
 
-  function startRun(){
-    attempts++;
-    $attempts.textContent = String(attempts);
+  function startGame(){
+    if(!state.level) setLevelById(LEVELS[0].id);
+    state.attempts += 1;
     resetRun();
-    setMode("playing");
-    beep(880, 0.06, "triangle", 0.02);
   }
 
-  function die(){
-    setMode("gameover");
-    dieSound();
-  }
-
-  function win(){
-    setMode("win");
-    winSound();
-  }
-
-  // ====== Rendering ======
-  const stars = Array.from({length: 90}, () => ({
-    x: Math.random() * W,
-    y: Math.random() * (H * 0.6),
-    r: Math.random() * 1.6 + 0.2,
-    s: Math.random() * 26 + 8
-  }));
-
-  function drawBackground(dt){
-    ctx.fillStyle = "#070a18";
-    ctx.fillRect(0,0,W,H);
-    ctx.fillStyle = "rgba(234,240,255,0.8)";
-    for (const st of stars){
-      st.x -= st.s * dt;
-      if (st.x < -5) st.x = W + Math.random() * 40;
-      ctx.beginPath();
-      ctx.arc(st.x, st.y, st.r, 0, Math.PI*2);
-      ctx.fill();
+  function restart(){
+    if(state.mode === "MENU"){
+      startGame();
+      return;
     }
-    const grd = ctx.createLinearGradient(0, groundY - 160, 0, groundY + 160);
-    grd.addColorStop(0, "rgba(124,247,199,0.12)");
-    grd.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, groundY - 180, W, 360);
+    state.attempts += 1;
+    resetRun();
+  }
 
-    // Ground line
-    ctx.strokeStyle = "rgba(255,255,255,0.12)";
+  function togglePause(){
+    if(state.mode === "PLAYING") setMode("PAUSED");
+    else if(state.mode === "PAUSED") setMode("PLAYING");
+  }
+
+  function openMenu(){
+    overlay.classList.add("show");
+    setMode("MENU");
+  }
+
+  function closeMenu(){
+    overlay.classList.remove("show");
+    // si estábamos en partida, no tocamos. si no, queda menú.
+  }
+
+  // =========================
+  //  Physics + collision
+  // =========================
+  function jump(){
+    if(state.mode !== "PLAYING") return;
+    if(player.onGround){
+      player.vy = -tuning.jump;
+      player.onGround = false;
+    }
+  }
+
+  function rectsOverlap(a,b){
+    return (a.x < b.x + b.w &&
+            a.x + a.w > b.x &&
+            a.y < b.y + b.h &&
+            a.y + a.h > b.y);
+  }
+
+  function obstacleToWorldRect(o){
+    // Obstáculos viven en coordenadas del "nivel" (x). En pantalla restamos camX al dibujar,
+    // pero para colisiones lo hacemos en mundo y comparamos con player.x+camX.
+    const base = { x:o.x, w:o.w, h:o.h, type:o.type };
+    if(o.type === "platform"){
+      const y = (groundY + (o.yOffset ?? -120));
+      return { x: base.x, y: y, w: base.w, h: base.h, type:o.type };
+    }
+    // spike / block: apoyados en suelo
+    return { x: base.x, y: groundY - base.h, w: base.w, h: base.h, type:o.type };
+  }
+
+  function kill(){
+    player.alive = false;
+    setMode("DEAD");
+  }
+
+  // =========================
+  //  Render
+  // =========================
+  function drawBackground(){
+    // estrellas simples
+    ctx.fillStyle = "#050818";
+    ctx.fillRect(0,0,W,H);
+
+    // glow
+    const g = ctx.createRadialGradient(W*0.25, H*0.2, 40, W*0.25, H*0.2, 520);
+    g.addColorStop(0, "#2b5cff22");
+    g.addColorStop(1, "#0000");
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,W,H);
+
+    ctx.fillStyle = "#ffffff10";
+    for(let i=0;i<120;i++){
+      const x = (i*97)%W;
+      const y = (i*53)%H;
+      ctx.fillRect(x, y, 2, 2);
+    }
+  }
+
+  function drawGround(){
+    ctx.fillStyle = "#0b1634";
+    ctx.fillRect(0, groundY, W, H-groundY);
+
+    // línea superior
+    ctx.strokeStyle = "#ffffff22";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(0, groundY + 1);
-    ctx.lineTo(W, groundY + 1);
+    ctx.moveTo(0, groundY);
+    ctx.lineTo(W, groundY);
     ctx.stroke();
 
-    // Ground tiles
-    const tileW = 46;
-    const L = levels[levelIndex];
-    const move = (scrollX * 0.35) % tileW;
-    ctx.fillStyle = "rgba(255,255,255,0.06)";
-    for (let x = -tileW; x < W + tileW; x += tileW){
-      const xx = x - move;
-      ctx.fillRect(xx, groundY + 6, tileW - 6, 10);
+    // cuadritos (sensación GD)
+    ctx.fillStyle = "#ffffff0f";
+    const size = 24;
+    for(let x=0; x<W; x+=size){
+      ctx.fillRect(x, groundY + (x/size%2===0?12:0), size-2, 10);
+    }
+  }
+
+  function drawObstacle(o){
+    const r = obstacleToWorldRect(o);
+    const sx = r.x - state.camX;
+    const sy = r.y;
+
+    if(r.type === "block"){
+      ctx.fillStyle = "#2a4fff55";
+      ctx.fillRect(sx, sy, r.w, r.h);
+      ctx.strokeStyle = "#93c5ff66";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(sx+1, sy+1, r.w-2, r.h-2);
+      // brillo
+      ctx.fillStyle = "#ffffff18";
+      ctx.fillRect(sx+4, sy+4, r.w-8, 8);
+    } else if(r.type === "spike"){
+      ctx.fillStyle = "#ff5b6eaa";
+      ctx.strokeStyle = "#ffd1d7aa";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(sx, sy+r.h);
+      ctx.lineTo(sx+r.w/2, sy);
+      ctx.lineTo(sx+r.w, sy+r.h);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    } else if(r.type === "platform"){
+      ctx.fillStyle = "#38d39f44";
+      ctx.fillRect(sx, sy, r.w, r.h);
+      ctx.strokeStyle = "#38d39f99";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(sx+1, sy+1, r.w-2, r.h-2);
     }
   }
 
   function drawPlayer(){
-    ctx.save();
-    ctx.translate(player.x + player.size/2, player.y - player.size/2);
-    ctx.rotate(player.rot);
-    ctx.fillStyle = "#7cf7c7";
-    ctx.fillRect(-player.size/2, -player.size/2, player.size, player.size);
-    ctx.fillStyle = "rgba(0,0,0,0.35)";
-    ctx.fillRect(-player.size/2 + 7, -player.size/2 + 9, 10, 10);
-    ctx.fillRect(-player.size/2 + 21, -player.size/2 + 9, 10, 10);
-    ctx.fillRect(-player.size/2 + 10, -player.size/2 + 26, 18, 6);
-    ctx.strokeStyle = "rgba(255,255,255,0.25)";
+    const px = player.x;
+    const py = player.y;
+
+    // cubo
+    ctx.fillStyle = "#e9f0ff";
+    ctx.fillRect(px, py, player.w, player.h);
+
+    // borde
+    ctx.strokeStyle = "#00000055";
     ctx.lineWidth = 2;
-    ctx.strokeRect(-player.size/2, -player.size/2, player.size, player.size);
-    ctx.restore();
+    ctx.strokeRect(px+1, py+1, player.w-2, player.h-2);
+
+    // “cara”
+    ctx.fillStyle = "#0b1634";
+    ctx.fillRect(px+12, py+14, 6, 6);
+    ctx.fillRect(px+26, py+14, 6, 6);
+    ctx.fillRect(px+16, py+28, 12, 4);
   }
 
-  function drawSpike(x, w, h){
-    ctx.save();
-    ctx.translate(x, groundY);
-    ctx.beginPath();
-    ctx.moveTo(0,0);
-    ctx.lineTo(w/2, -h);
-    ctx.lineTo(w,0);
-    ctx.closePath();
-    ctx.fillStyle = "#ff5a7a";
-    ctx.fill();
-    ctx.strokeStyle = "rgba(255,255,255,0.25)";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.restore();
-  }
+  function drawHUD(){
+    if(!state.level) return;
+    const prog = Math.max(0, Math.min(1, state.camX / state.level.length));
+    ui.progress.textContent = Math.round(prog*100) + "%";
 
-  function drawBlock(x, w, h){
-    ctx.save();
-    ctx.translate(x, groundY);
-    ctx.fillStyle = "rgba(255,255,255,0.10)";
-    ctx.fillRect(0, -h, w, h);
-    ctx.strokeStyle = "rgba(255,255,255,0.22)";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(0, -h, w, h);
-    ctx.restore();
-  }
+    // barra progreso
+    const barW = W - 40, barH = 10, x = 20, y = 18;
+    ctx.fillStyle = "#ffffff14";
+    ctx.fillRect(x, y, barW, barH);
+    ctx.fillStyle = "#38d39fbb";
+    ctx.fillRect(x, y, barW*prog, barH);
+    ctx.strokeStyle = "#ffffff22";
+    ctx.strokeRect(x, y, barW, barH);
 
-  function drawOverlay(){
-    if (mode === "playing") return;
-    ctx.fillStyle = "rgba(0,0,0,0.55)";
-    ctx.fillRect(0,0,W,H);
-    ctx.textAlign = "center";
-
-    if (mode === "menu"){
-      ctx.fillStyle = "rgba(234,240,255,0.92)";
-      ctx.font = "800 40px system-ui";
-      ctx.fillText("MENÚ", W/2, H/2 - 20);
-      ctx.font = "500 18px system-ui";
-      ctx.fillStyle = "rgba(234,240,255,0.78)";
-      ctx.fillText("Elige nivel abajo y pulsa Jugar", W/2, H/2 + 20);
-      return;
+    if(state.mode === "MENU"){
+      ctx.fillStyle = "#ffffffcc";
+      ctx.font = "900 28px system-ui";
+      ctx.fillText("Pulsa JUGAR o abre MENÚ (M)", 22, 72);
+      ctx.fillStyle = "#b9c8ffcc";
+      ctx.font = "600 14px system-ui";
+      ctx.fillText("Objetivo: saltar obstáculos. Ajusta velocidad/gravedad si lo notas raro.", 22, 96);
     }
 
-    if (mode === "paused"){
-      ctx.fillStyle = "rgba(234,240,255,0.92)";
-      ctx.font = "800 40px system-ui";
-      ctx.fillText("PAUSA", W/2, H/2 - 20);
-      ctx.font = "500 18px system-ui";
-      ctx.fillStyle = "rgba(234,240,255,0.78)";
-      ctx.fillText("Pulsa P para continuar", W/2, H/2 + 20);
-      return;
+    if(state.mode === "PAUSED"){
+      ctx.fillStyle = "#ffffffdd";
+      ctx.font = "900 36px system-ui";
+      ctx.fillText("PAUSA", 22, 80);
     }
 
-    if (mode === "gameover"){
-      ctx.fillStyle = "rgba(234,240,255,0.92)";
-      ctx.font = "900 44px system-ui";
-      ctx.fillText("GAME OVER", W/2, H/2 - 22);
-      ctx.font = "600 18px system-ui";
-      ctx.fillStyle = "rgba(234,240,255,0.80)";
-      ctx.fillText("Pulsa ESPACIO / ↑ / toque para reintentar", W/2, H/2 + 20);
-      ctx.fillText("Pulsa R para reiniciar / Menú para cambiar nivel", W/2, H/2 + 48);
-      return;
+    if(state.mode === "DEAD"){
+      ctx.fillStyle = "#ffccd3";
+      ctx.font = "900 34px system-ui";
+      ctx.fillText("¡KO! Pulsa R para reiniciar", 22, 80);
     }
 
-    if (mode === "win"){
-      ctx.fillStyle = "rgba(234,240,255,0.92)";
-      ctx.font = "900 44px system-ui";
-      ctx.fillText("¡VICTORIA!", W/2, H/2 - 22);
-      ctx.font = "600 18px system-ui";
-      ctx.fillStyle = "rgba(234,240,255,0.80)";
-      ctx.fillText("Pulsa ESPACIO / ↑ / toque para jugar otra vez", W/2, H/2 + 20);
-      ctx.fillText("Pulsa Menú para cambiar de nivel", W/2, H/2 + 48);
-      return;
+    if(state.mode === "WIN"){
+      ctx.fillStyle = "#c7ffe9";
+      ctx.font = "900 34px system-ui";
+      ctx.fillText("¡VICTORIA! 🎉 Pulsa M para otro nivel", 22, 80);
     }
   }
 
-  // ====== Collision ======
-  function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh){
-    return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
-  }
+  // =========================
+  //  Loop
+  // =========================
+  function tick(ts){
+    if(!state.lastTime) state.lastTime = ts;
+    const dt = Math.min(0.033, (ts - state.lastTime) / 1000);
+    state.lastTime = ts;
 
-  // Player rect: top-left in canvas coordinates
-  function playerRect(){
-    return {
-      x: player.x,
-      y: player.y - player.size,
-      w: player.size,
-      h: player.size
-    };
-  }
+    // Update
+    if(state.mode === "PLAYING" && state.level){
+      // cámara avanza
+      state.camX += tuning.speed * dt;
 
-  function obstacleRectsOnScreen(){
-    const L = levels[levelIndex];
-    const res = [];
-    for (const o of L.obstacles){
-      const sx = o.x - scrollX; // screen x
-      if (sx < -120 || sx > W + 120) continue;
-      if (o.type === "block"){
-        res.push({type:"block", x:sx, y:groundY - o.h, w:o.w, h:o.h});
-      } else {
-        // spike: approximate as a box for collision (fair)
-        res.push({type:"spike", x:sx, y:groundY - o.h, w:o.w, h:o.h});
-      }
-    }
-    return res;
-  }
+      // gravedad
+      player.vy += tuning.gravity * dt;
+      player.y += player.vy * dt;
 
-  // ====== Input (no delay) ======
-  function requestJump(){
-    if (mode === "menu"){ startRun(); return; }
-    if (mode === "paused"){ return; }
-    if (mode === "gameover" || mode === "win"){ startRun(); return; }
-    // playing
-    jump.buffer = jump.bufferTime; // buffer jump press
-  }
-
-  // ====== Update ======
-  function update(dt){
-    if (mode !== "playing") return;
-
-    const L = levels[levelIndex];
-
-    // progress
-    const pct = clamp((scrollX / L.length) * 100, 0, 100);
-    $progress.textContent = `${pct.toFixed(0)}%`;
-
-    // scroll
-    scrollX += L.speed * dt;
-
-    // finish
-    if (scrollX >= L.length){
-      win();
-      return;
-    }
-
-    // timers
-    jump.buffer = Math.max(0, jump.buffer - dt);
-    jump.coyote = Math.max(0, jump.coyote - dt);
-
-    // gravity
-    player.vy += jump.gravity * dt;
-    player.y += player.vy * dt;
-
-    // ground collision
-    if (player.y >= groundY){
-      player.y = groundY;
-      player.vy = 0;
-      if (!player.onGround) beep(520, 0.02, "sine", 0.01);
-      player.onGround = true;
-      player.rot = 0;
-      jump.coyote = jump.coyoteTime;
-    } else {
-      if (player.onGround) jump.coyote = jump.coyoteTime; // just left (safe)
-      player.onGround = false;
-      player.rot += (Math.PI * 2) * dt * 1.2;
-    }
-
-    // Execute buffered jump if allowed (coyote or onGround)
-    if (jump.buffer > 0 && (player.onGround || jump.coyote > 0)){
-      player.vy = jump.jumpVel;
-      player.onGround = false;
-      jump.buffer = 0;
-      jump.coyote = 0;
-      beep(740, 0.04, "square", 0.02);
-    }
-
-    // Collision with obstacles (screen rects)
-    const p = playerRect();
-    const obs = obstacleRectsOnScreen();
-
-    // Also allow landing on blocks (simple platform-like)
-    for (const o of obs){
-      if (o.type !== "block") continue;
-      // If player is falling and hits top of block, land
-      const wasAbove = (p.y + p.h) <= (o.y + 10);
-      const nowOver = rectsOverlap(p.x, p.y, p.w, p.h, o.x, o.y, o.w, o.h);
-      if (nowOver && player.vy >= 0 && wasAbove){
-        player.y = o.y; // top of block is player's groundY
+      // suelo
+      if(player.y >= groundY - player.h){
+        player.y = groundY - player.h;
         player.vy = 0;
         player.onGround = true;
-        player.rot = 0;
-        jump.coyote = jump.coyoteTime;
+      }
+
+      // colisiones (en mundo)
+      const pWorld = { x: player.x + state.camX, y: player.y, w: player.w, h: player.h };
+
+      for(const o of state.level.obstacles){
+        const r = obstacleToWorldRect(o);
+
+        // plataformas: si caemos encima, se puede “pisar”
+        if(r.type === "platform"){
+          // condición de aterrizaje: venimos desde arriba y tocamos la parte superior
+          const above = (pWorld.y + pWorld.h) <= (r.y + 18);
+          const willTouch = rectsOverlap(pWorld, r);
+          if(above && willTouch && player.vy > 0){
+            // ponemos jugador encima de plataforma
+            player.y = r.y - player.h;
+            player.vy = 0;
+            player.onGround = true;
+          }
+          continue;
+        }
+
+        // block: colision mata (estilo simple GD)
+        if(rectsOverlap(pWorld, r)){
+          kill();
+          break;
+        }
+      }
+
+      // win
+      if(state.camX >= state.level.length){
+        setMode("WIN");
       }
     }
 
-    // Recompute after potential landing on blocks
-    const p2 = playerRect();
-    for (const o of obs){
-      // block collision (side) or spike collision -> die
-      if (rectsOverlap(p2.x, p2.y, p2.w, p2.h, o.x, o.y, o.w, o.h)){
-        die();
-        return;
+    // Render
+    drawBackground();
+    drawGround();
+
+    if(state.level){
+      // dibujar solo obstáculos cercanos para rendimiento
+      const viewL = state.camX - 200;
+      const viewR = state.camX + W + 300;
+      for(const o of state.level.obstacles){
+        if(o.x + (o.w||0) < viewL) continue;
+        if(o.x > viewR) continue;
+        drawObstacle(o);
       }
-    }
-  }
-
-  function render(dt){
-    drawBackground(dt);
-
-    // Draw obstacles
-    const L = levels[levelIndex];
-    for (const o of L.obstacles){
-      const sx = o.x - scrollX;
-      if (sx < -160 || sx > W + 160) continue;
-      if (o.type === "block") drawBlock(sx, o.w, o.h);
-      else drawSpike(sx, o.w, o.h);
     }
 
     drawPlayer();
-    drawOverlay();
+    drawHUD();
+
+    requestAnimationFrame(tick);
   }
 
-  function loop(t){
-    const frameDt = Math.min(0.05, (t - lastT) / 1000);
-    lastT = t;
-
-    // FPS
-    fpsAcc += frameDt; fpsCount++;
-    if (t - fpsLast > 500){
-      const fps = Math.round(fpsCount / fpsAcc);
-      $fps.textContent = String(fps);
-      fpsAcc = 0; fpsCount = 0; fpsLast = t;
-    }
-
-    // Update with fixed dt
-    if (mode === "playing"){
-      accumulator += frameDt;
-      // avoid spiral of death
-      accumulator = Math.min(accumulator, 0.25);
-
-      while (accumulator >= FIXED_DT){
-        update(FIXED_DT);
-        accumulator -= FIXED_DT;
-        if (mode !== "playing") break;
-      }
-    }
-
-    render(frameDt);
-    requestAnimationFrame(loop);
-  }
-
-  // ====== Menu / level grid ======
-  function drawMenuSelection(){
-    gridEl.innerHTML = "";
-    levels.forEach((lv, idx) => {
-      const card = document.createElement("div");
-      card.className = "card";
-      card.style.outline = idx === levelIndex ? "2px solid rgba(124,247,199,0.55)" : "none";
-      card.innerHTML = `
-        <h3>${lv.name}</h3>
-        <p>${lv.desc}</p>
-        <p style="margin-top:8px;" class="tiny">Velocidad: <b style="color:var(--acc)">${lv.speed}</b> · Longitud: <b style="color:var(--acc)">${lv.length}</b></p>
-        <div class="row" style="margin-top:10px;">
-          <button data-pick="${idx}">Elegir</button>
-        </div>
-      `;
-      gridEl.appendChild(card);
-    });
-
-    gridEl.querySelectorAll("button[data-pick]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        loadLevel(Number(btn.getAttribute("data-pick")));
-      });
-    });
-  }
-
-  // ====== Controls ======
-  function togglePause(){
-    if (mode === "playing"){
-      setMode("paused");
-      btnPause.textContent = "▶️ Continuar";
-    } else if (mode === "paused"){
-      setMode("playing");
-      btnPause.textContent = "⏸️ Pausa";
-    }
-  }
-
+  // =========================
+  //  Inputs
+  // =========================
   window.addEventListener("keydown", (e) => {
-    if (e.code === "Space" || e.code === "ArrowUp"){
-      e.preventDefault();
-      requestJump();
-    }
-    if (e.code === "KeyR"){
-      e.preventDefault();
-      if (mode === "playing" || mode === "paused" || mode === "gameover" || mode === "win"){
-        startRun();
-      }
-    }
-    if (e.code === "KeyP"){
-      e.preventDefault();
-      if (mode === "playing" || mode === "paused") togglePause();
-    }
-    if (e.code === "Escape"){
-      e.preventDefault();
-      setMode("menu");
-    }
-  }, {passive:false});
+    const k = e.key.toLowerCase();
+    if(k === " " || k === "arrowup") { e.preventDefault(); jump(); }
+    if(k === "p") togglePause();
+    if(k === "r") restart();
+    if(k === "m") openMenu();
+  });
 
-  canvas.addEventListener("pointerdown", (e) => {
-    e.preventDefault();
-    requestJump();
-  }, {passive:false});
+  cv.addEventListener("pointerdown", () => jump());
 
   // Buttons
-  btnMenu.addEventListener("click", () => setMode("menu"));
-  btnPause.addEventListener("click", () => { if (mode==="playing"||mode==="paused") togglePause(); });
-  btnRestart.addEventListener("click", () => startRun());
-  btnMute.addEventListener("click", () => {
-    muted = !muted;
-    btnMute.textContent = muted ? "🔇 Sonido: OFF" : "🔊 Sonido: ON";
-    if (!muted) beep(880, 0.06, "triangle", 0.02);
+  btnMenu.addEventListener("click", openMenu);
+  btnCloseMenu.addEventListener("click", closeMenu);
+  btnPause.addEventListener("click", togglePause);
+  btnRestart.addEventListener("click", restart);
+  btnPlay.addEventListener("click", () => { closeMenu(); startGame(); });
+  btnMenuPlay.addEventListener("click", () => { closeMenu(); startGame(); });
+
+  // Sliders
+  speedRange.addEventListener("input", () => {
+    tuning.speed = Number(speedRange.value);
+    updateKpis();
+  });
+  gravRange.addEventListener("input", () => {
+    tuning.gravity = Number(gravRange.value);
+    updateKpis();
+  });
+  jumpRange.addEventListener("input", () => {
+    tuning.jump = Number(jumpRange.value);
+    updateKpis();
   });
 
-  btnPlay.addEventListener("click", () => startRun());
-  btnHow.addEventListener("click", () => {
-    menuInfo.textContent =
-      "Controles: ESPACIO/↑/toque = salto. R = reintentar. P = pausa. " +
-      "Incluye jump buffer y coyote time para que NO haya delay.";
+  // Selector
+  levelSelect.addEventListener("change", () => {
+    setLevelById(levelSelect.value);
+    highlightSelected();
   });
 
-  // Init
-  loadLevel(0);
-  $attempts.textContent = "0";
-  setMode("menu");
-  requestAnimationFrame(loop);
+  // =========================
+  //  Init
+  // =========================
+  buildLevelSelect();
+  setLevelById(LEVELS[0].id);
+  buildMenuGrid();
+  setMode("MENU");
+  updateKpis();
+  requestAnimationFrame(tick);
+
 })();
 </script>
 </body>
