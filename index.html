@@ -517,13 +517,13 @@
   let selectedLevelId = null;
 
   btnMenuPlay.onclick = () => {
-  // si no hay nivel seleccionado, usamos el primero
   if (!selectedLevelId) {
     selectedLevelId = LEVELS[0].id;
   }
 
   setLevelById(selectedLevelId);
-  setMode("PLAYING");   // ← AÑADE ESTA LÍNEA
+  overlay.style.display = "none"; // 👈 ESTA LÍNEA
+  setMode("PLAYING");
   updateKpis();
   resetRun();
 };
