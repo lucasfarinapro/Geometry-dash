@@ -388,7 +388,97 @@
         {type:"spike", x: 3020, w:36, h:36},
         {type:"spike", x: 3320, w:36, h:36},
       ]
-    }
+    ,
+{
+  id: "orb-4",
+  name: "Nivel 4 — Orbes & Nave",
+  diff: "MEDIO",
+  desc: "Primer uso de nave con orbes.",
+  speed: 380,
+  gravity: 1700,
+  jump: 520,
+  length: 5200,
+  obstacles: [
+    // modo nave
+    { type:"mode", mode:"ship", x: 0 },
+
+    // pinchos base
+    { type:"spike", x: 0, w: 6000, h: 36 },
+
+    // bloques + orbes
+    { type:"block", x: 700, w:54, h:54 },
+    { type:"orb",   x: 720, yOffset:-160 },
+
+    { type:"block", x: 1200, w:54, h:54 },
+    { type:"orb",   x: 1220, yOffset:-190 },
+
+    { type:"block", x: 1700, w:54, h:54 },
+    { type:"orb",   x: 1720, yOffset:-220 },
+
+    // salida de nave
+    { type:"mode", mode:"cube", x: 2600 }
+  ]
+},
+
+{
+  id: "orb-5",
+  name: "Nivel 5 — Bola & UFO",
+  diff: "MEDIO+",
+  desc: "Cambios rápidos de modo.",
+  speed: 400,
+  gravity: 1800,
+  jump: 540,
+  length: 5600,
+  obstacles: [
+    // modo bola
+    { type:"mode", mode:"ball", x: 0 },
+
+    { type:"spike", x: 0, w: 6500, h: 36 },
+
+    { type:"orb", x: 600,  yOffset:-140 },
+    { type:"orb", x: 900,  yOffset:-200 },
+    { type:"orb", x: 1200, yOffset:-140 },
+
+    // cambio a UFO
+    { type:"mode", mode:"ufo", x: 1600 },
+
+    { type:"orb", x: 1800, yOffset:-180 },
+    { type:"orb", x: 2100, yOffset:-220 },
+    { type:"orb", x: 2400, yOffset:-180 },
+
+    // volver a cubo
+    { type:"mode", mode:"cube", x: 3000 }
+  ]
+},
+
+{
+  id: "orb-6",
+  name: "Nivel 6 — Wave",
+  diff: "DIFÍCIL",
+  desc: "Wave puro con orbes de control.",
+  speed: 420,
+  gravity: 0,
+  jump: 0,
+  length: 6000,
+  obstacles: [
+    // modo wave
+    { type:"mode", mode:"wave", x: 0 },
+
+    // paredes (simuladas con bloques)
+    { type:"block", x: 600,  w:40, h:200 },
+    { type:"block", x: 600,  w:40, h:200, yOffset:-200 },
+
+    { type:"block", x: 900,  w:40, h:200 },
+    { type:"block", x: 900,  w:40, h:200, yOffset:-200 },
+
+    // orbes de ajuste
+    { type:"orb", x: 750,  yOffset:-120 },
+    { type:"orb", x: 1050, yOffset:-180 },
+
+    // salida
+    { type:"mode", mode:"cube", x: 3500 }
+  ]
+}
   ];
 
   // =========================
