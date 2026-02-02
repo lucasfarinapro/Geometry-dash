@@ -516,6 +516,16 @@
   
   let selectedLevelId = null;
 
+  btnMenuPlay.onclick = () => {
+  if (!selectedLevelId) {
+    alert("Selecciona un nivel primero");
+    return;
+  }
+
+  setLevelById(selectedLevelId);
+  startGame();
+};
+
   const W = cv.width, H = cv.height;
   const groundY = H - 90;
 
@@ -624,10 +634,12 @@ const player = {
           <span style="opacity:.9">Vel: <b>${l.speed}</b> · Grav: <b>${l.gravity}</b></span>
         </div>
       `;
-      el.addEventListener("click", () => {
-        levelSelect.value = l.id;
-        setLevelById(l.id);
-        highlightSelected();
+     el.addEventListener("click", () => {
+  selectedLevelId = l.id;   // 🔥 ESTA ES LA CLAVE
+  levelSelect.value = l.id;
+  setLevelById(l.id);
+  highlightSelected();
+});
       });
       levelsGrid.appendChild(el);
     });
