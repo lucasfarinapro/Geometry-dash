@@ -566,7 +566,14 @@ const player = {
   function setMode(m){
   state.mode = m;
 
-  if (m === "MENU") {
+  const isMenu = m === "MENU";
+
+  // 🔒 Bloquear ajustes cuando estás en menú
+  speedRange.disabled = isMenu;
+  gravRange.disabled  = isMenu;
+  jumpRange.disabled  = isMenu;
+
+  if (isMenu) {
     renderLevels();
   }
 
