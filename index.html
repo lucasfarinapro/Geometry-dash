@@ -771,6 +771,7 @@
       state.camX += tuning.speed * dt;
 
       // gravedad
+      player.prevY = player.y;
       player.vy += tuning.gravity * dt;
       player.y += player.vy * dt;
 
@@ -801,11 +802,29 @@
           continue;
         }
 
-        // block: colision mata (estilo simple GD)
-        if(rectsOverlap(pWorld, r)){
-          kill();
-          break;
-        }
+        // block: sólido desde arriba (Geometry Dash)
+if (r.type === "block") {
+  const prevBottom = player.prevY + player.h;
+  const currBottom = player.y + player.h;
+
+  const fallingFromAbove =
+    prevBottom <= r.y &&
+    currBottom >= r.y &&
+    player.vy > 0 &&
+    pWorld.x + pWorld.w > r.x &&
+    pWorld.x < r.x + r.w;
+
+  if (fallingFromAbove) {
+    // apoyarse encima del bloque
+    player.y = r.y - player.h;
+    player.vy = 0;
+    player.onGround = true;
+  } else if (rectsOverlap(pWorld, r)) {
+    // lateral o por debajo = muerte
+    kill();
+    break;
+  }
+}
       }
 
       // win
