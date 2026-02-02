@@ -774,8 +774,20 @@
       player.prevY = player.y;
       player.vy += tuning.gravity * dt;
       player.y += player.vy * dt;
+      // pinchos: comprobar ANTES del suelo
+const pWorld = { x: player.x + state.camX, y: player.y, w: player.w, h: player.h };
+
+for(const o of state.level.obstacles){
+  if(o.type !== "spike") continue;
+  const r = obstacleToWorldRect(o);
+  if(rectsOverlap(pWorld, r)){
+    kill();
+    break;
+  }
+}
 
       // suelo
+      
       if(player.y >= groundY - player.h){
         player.y = groundY - player.h;
         player.vy = 0;
@@ -821,13 +833,6 @@ if (r.type === "block") {
     player.onGround = true;
   } else if (rectsOverlap(pWorld, r)) {
     // lateral o por debajo = muerte
-    kill();
-    break;
-  }
-}
-        // spike: cualquier contacto = muerte
-if (r.type === "spike") {
-  if (rectsOverlap(pWorld, r)) {
     kill();
     break;
   }
