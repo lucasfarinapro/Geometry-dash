@@ -778,10 +778,10 @@
     }
 
     if(type === "orb"){
-      // orb es pequeño, flotante
-      const w = 28, h = 28;
-      const y = (groundY - 140) + Number(o?.yOffset ?? 0);
-      return { type, x: x, y, w, h };
+  const w = 28, h = 28;
+  const y = groundY - h + (o.yOffset ?? 0); // 👈 EN EL SUELO
+  return { type, x, y, w, h };
+      
     }
 
     // type "mode" no es colisionable
