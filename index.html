@@ -29,10 +29,7 @@
       border-radius:14px;
       box-shadow: 0 10px 35px #00000055;
     }
-    .title{
-      display:flex; gap:10px; align-items:center;
-      font-weight:800; letter-spacing:.2px;
-    }
+    .title{display:flex; gap:10px; align-items:center; font-weight:800; letter-spacing:.2px;}
     .title small{display:block; font-weight:600; color:var(--muted); margin-top:2px}
     .pill{
       display:inline-flex; gap:10px; align-items:center;
@@ -63,9 +60,7 @@
     }
     .panel .body{padding:14px}
     .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
-    button, select, input[type="range"]{
-      font:inherit;
-    }
+    button, select, input[type="range"]{font:inherit;}
     button{
       border:1px solid var(--stroke);
       background:linear-gradient(180deg, var(--btn2), var(--btn));
@@ -77,12 +72,8 @@
     }
     button:hover{filter:brightness(1.08)}
     button:active{transform:translateY(1px)}
-    button.secondary{
-      background:linear-gradient(180deg, #0f1f49, #0b1533);
-    }
-    button.danger{
-      background:linear-gradient(180deg, #a1122c, #5b0d1c);
-    }
+    button.secondary{background:linear-gradient(180deg, #0f1f49, #0b1533);}
+    button.danger{background:linear-gradient(180deg, #a1122c, #5b0d1c);}
     select{
       border:1px solid var(--stroke);
       background:#0b1634;
@@ -200,12 +191,16 @@
         <div style="font-size:18px">⬛ Dash Pro</div>
         <div>
           <div style="font-size:14px; font-weight:800">— niveles tipo Geometry Dash</div>
-          <small>Saltar: <span class="kbd">Espacio</span> / <span class="kbd">↑</span> / toque · Pausa: <span class="kbd">P</span> · Menú: <span class="kbd">M</span> · Reiniciar: <span class="kbd">R</span></small>
+          <small>
+            Saltar / acción: <span class="kbd">Espacio</span> / <span class="kbd">↑</span> / toque ·
+            Pausa: <span class="kbd">P</span> · Menú: <span class="kbd">M</span> · Reiniciar: <span class="kbd">R</span>
+          </small>
         </div>
       </div>
 
       <div class="pill">
         <span>Nivel: <b id="uiLevelName">—</b></span>
+        <span>Modo: <b id="uiPlayerMode">CUBE</b></span>
         <span>Estado: <b id="uiState" style="color:var(--good)">MENÚ</b></span>
       </div>
     </header>
@@ -245,7 +240,7 @@
           <div class="sep"></div>
           <div class="hint">
             🔧 Ajustes en tiempo real: si “va muy rápido” o “gravedad muy alta”, aquí lo arreglamos sin tocar el motor.<br/>
-            Consejo: para que un nivel sea justo, dejamos **mínimo 1.1–1.4s** entre picos a la misma altura.
+            Nota: en <b>SHIP</b> mantén pulsado para subir. En <b>WAVE</b> mantén para subir / suelta para bajar.
           </div>
         </div>
       </div>
@@ -265,13 +260,13 @@
           <div class="control">
             <label>Gravedad (px/s²)</label>
             <div class="mini" id="uiGravBox">1650</div>
-            <input id="gravRange" type="range" min="900" max="2600" value="1650" />
+            <input id="gravRange" type="range" min="0" max="2600" value="1650" />
           </div>
 
           <div class="control">
             <label>Altura de salto (impulso)</label>
             <div class="mini" id="uiJumpBox">520</div>
-            <input id="jumpRange" type="range" min="360" max="720" value="520" />
+            <input id="jumpRange" type="range" min="0" max="720" value="520" />
           </div>
 
           <div class="sep"></div>
@@ -284,13 +279,8 @@
           <div class="sep"></div>
 
           <div class="hint">
-            📌 “No encuentro <b>type: spike</b>” → En este motor los obstáculos son objetos con <b>type</b>:
-            <div style="margin-top:6px">
-              - <b>spike</b> = pincho (triángulo) <br/>
-              - <b>block</b> = bloque (cubo) <br/>
-              - <b>platform</b> = plataforma elevada <br/>
-            </div>
-            Si quieres, añadimos después <b>orb</b> (salto extra) y <b>pad</b> (rebote).
+            📌 Tipos soportados: <b>spike</b>, <b>block</b>, <b>platform</b>, <b>orb</b>, <b>mode</b>.<br/>
+            Modo: <b>cube</b>, <b>ship</b>, <b>ball</b>, <b>ufo</b>, <b>wave</b>.
           </div>
         </div>
       </div>
@@ -304,7 +294,7 @@
         <div class="title">
           <div style="font-size:18px">🏁 Selector de niveles</div>
           <div>
-            <small>Elige un nivel jugable. Luego tocamos dificultad.</small>
+            <small>Elige un nivel. Luego dale a “Jugar nivel”.</small>
           </div>
         </div>
         <div class="row">
@@ -324,9 +314,9 @@
 
 <script>
 (() => {
-  // =========================
-  //  NIVELES (jugables)
-  // =========================
+  // ==========================================================
+  //  NIVELES (incluye orbes + modos: ship/ball/ufo/wave/cube)
+  // ==========================================================
   const LEVELS = [
     {
       id: "easy-1",
@@ -338,7 +328,6 @@
       jump: 520,
       length: 2600,
       obstacles: [
-        // suelo: y = groundY
         {type:"spike", x: 520, w:36, h:36},
         {type:"block", x: 860, w:54, h:54},
         {type:"spike", x: 1180, w:36, h:36},
@@ -388,108 +377,143 @@
         {type:"spike", x: 3020, w:36, h:36},
         {type:"spike", x: 3320, w:36, h:36},
       ]
-    ,
-{
-  id: "orb-4",
-  name: "Nivel 4 — Orbes & Nave",
-  diff: "MEDIO",
-  desc: "Primer uso de nave con orbes.",
-  speed: 380,
-  gravity: 1700,
-  jump: 520,
-  length: 5200,
-  obstacles: [
-    // modo nave
-    { type:"mode", mode:"ship", x: 0 },
+    },
 
-    // pinchos base
-    { type:"spike", x: 0, w: 6000, h: 36 },
+    // ==== tus niveles con orbes + modos (arreglados para este motor)
+    {
+      id: "orb-4",
+      name: "Nivel 4 — Orbes & Nave",
+      diff: "MEDIO",
+      desc: "Primer uso de nave con orbes.",
+      speed: 380,
+      gravity: 1700,
+      jump: 520,
+      length: 5200,
+      obstacles: [
+        // trigger modo
+        { type:"mode", mode:"ship", x: 0 },
 
-    // bloques + orbes
-    { type:"block", x: 700, w:54, h:54 },
-    { type:"orb",   x: 720, yOffset:-160 },
+        // suelo de pinchos (simulado: muchos spikes separados para ser ligero)
+        { type:"spike", x: 220, w:36, h:36 },
+        { type:"spike", x: 360, w:36, h:36 },
+        { type:"spike", x: 500, w:36, h:36 },
+        { type:"spike", x: 640, w:36, h:36 },
+        { type:"spike", x: 780, w:36, h:36 },
+        { type:"spike", x: 920, w:36, h:36 },
 
-    { type:"block", x: 1200, w:54, h:54 },
-    { type:"orb",   x: 1220, yOffset:-190 },
+        // bloques + orbes
+        { type:"block", x: 700, w:54, h:54 },
+        { type:"orb",   x: 720, yOffset:-160 },
 
-    { type:"block", x: 1700, w:54, h:54 },
-    { type:"orb",   x: 1720, yOffset:-220 },
+        { type:"block", x: 1200, w:54, h:54 },
+        { type:"orb",   x: 1220, yOffset:-190 },
 
-    // salida de nave
-    { type:"mode", mode:"cube", x: 2600 }
-  ]
-},
+        { type:"block", x: 1700, w:54, h:54 },
+        { type:"orb",   x: 1720, yOffset:-220 },
 
-{
-  id: "orb-5",
-  name: "Nivel 5 — Bola & UFO",
-  diff: "MEDIO+",
-  desc: "Cambios rápidos de modo.",
-  speed: 400,
-  gravity: 1800,
-  jump: 540,
-  length: 5600,
-  obstacles: [
-    // modo bola
-    { type:"mode", mode:"ball", x: 0 },
+        // obstáculos extra para que se vea movimiento
+        { type:"block", x: 2100, w:54, h:140 },
+        { type:"block", x: 2400, w:54, h:220, yOffset:-120 },
 
-    { type:"spike", x: 0, w: 6500, h: 36 },
+        // salida de nave
+        { type:"mode", mode:"cube", x: 3000 },
 
-    { type:"orb", x: 600,  yOffset:-140 },
-    { type:"orb", x: 900,  yOffset:-200 },
-    { type:"orb", x: 1200, yOffset:-140 },
+        { type:"spike", x: 3250, w:36, h:36 },
+        { type:"spike", x: 3480, w:36, h:36 },
+        { type:"block", x: 3760, w:54, h:54 },
+        { type:"spike", x: 4040, w:36, h:36 },
+      ]
+    },
 
-    // cambio a UFO
-    { type:"mode", mode:"ufo", x: 1600 },
+    {
+      id: "orb-5",
+      name: "Nivel 5 — Bola & UFO",
+      diff: "MEDIO+",
+      desc: "Cambios rápidos de modo.",
+      speed: 400,
+      gravity: 1800,
+      jump: 540,
+      length: 5600,
+      obstacles: [
+        { type:"mode", mode:"ball", x: 0 },
 
-    { type:"orb", x: 1800, yOffset:-180 },
-    { type:"orb", x: 2100, yOffset:-220 },
-    { type:"orb", x: 2400, yOffset:-180 },
+        { type:"spike", x: 520, w:36, h:36 },
+        { type:"spike", x: 780, w:36, h:36 },
+        { type:"block", x: 980, w:54, h:54 },
+        { type:"platform", x: 1200, w:240, h:22, yOffset:-160 },
 
-    // volver a cubo
-    { type:"mode", mode:"cube", x: 3000 }
-  ]
-},
+        // orbes que ayudan a salir
+        { type:"orb", x: 600,  yOffset:-140 },
+        { type:"orb", x: 900,  yOffset:-200 },
+        { type:"orb", x: 1200, yOffset:-140 },
 
-{
-  id: "orb-6",
-  name: "Nivel 6 — Wave",
-  diff: "DIFÍCIL",
-  desc: "Wave puro con orbes de control.",
-  speed: 420,
-  gravity: 0,
-  jump: 0,
-  length: 6000,
-  obstacles: [
-    // modo wave
-    { type:"mode", mode:"wave", x: 0 },
+        // cambio a UFO
+        { type:"mode", mode:"ufo", x: 1600 },
 
-    // paredes (simuladas con bloques)
-    { type:"block", x: 600,  w:40, h:200 },
-    { type:"block", x: 600,  w:40, h:200, yOffset:-200 },
+        { type:"block", x: 1900, w:54, h:54 },
+        { type:"orb", x: 1800, yOffset:-180 },
+        { type:"orb", x: 2100, yOffset:-220 },
+        { type:"orb", x: 2400, yOffset:-180 },
 
-    { type:"block", x: 900,  w:40, h:200 },
-    { type:"block", x: 900,  w:40, h:200, yOffset:-200 },
+        { type:"spike", x: 2700, w:36, h:36 },
+        { type:"spike", x: 2920, w:36, h:36 },
 
-    // orbes de ajuste
-    { type:"orb", x: 750,  yOffset:-120 },
-    { type:"orb", x: 1050, yOffset:-180 },
+        // volver a cubo
+        { type:"mode", mode:"cube", x: 3200 },
 
-    // salida
-    { type:"mode", mode:"cube", x: 3500 }
-  ]
-}
+        { type:"block", x: 3600, w:54, h:54 },
+        { type:"spike", x: 3920, w:36, h:36 },
+        { type:"platform", x: 4200, w:260, h:22, yOffset:-180 },
+        { type:"spike", x: 4620, w:36, h:36 },
+      ]
+    },
+
+    {
+      id: "orb-6",
+      name: "Nivel 6 — Wave",
+      diff: "DIFÍCIL",
+      desc: "Wave puro con orbes de control.",
+      speed: 420,
+      gravity: 0,
+      jump: 0,
+      length: 6000,
+      obstacles: [
+        { type:"mode", mode:"wave", x: 0 },
+
+        // “paredes” (bloques altos)
+        { type:"block", x: 600,  w:40, h:240 },
+        { type:"block", x: 600,  w:40, h:240, yOffset:-240 },
+
+        { type:"block", x: 900,  w:40, h:240 },
+        { type:"block", x: 900,  w:40, h:240, yOffset:-240 },
+
+        { type:"block", x: 1200,  w:40, h:240 },
+        { type:"block", x: 1200,  w:40, h:240, yOffset:-240 },
+
+        // orbes “suaves”: en wave dan un empujón vertical pequeño
+        { type:"orb", x: 750,  yOffset:-120 },
+        { type:"orb", x: 1050, yOffset:-180 },
+
+        // salida
+        { type:"mode", mode:"cube", x: 3500 },
+
+        { type:"spike", x: 3800, w:36, h:36 },
+        { type:"block", x: 4100, w:54, h:54 },
+        { type:"spike", x: 4400, w:36, h:36 },
+      ]
+    }
   ];
 
-  // =========================
+  // ==========================================================
   //  CANVAS + ESTADO
-  // =========================
+  // ==========================================================
   const cv = document.getElementById("cv");
   const ctx = cv.getContext("2d");
 
   const ui = {
     levelName: document.getElementById("uiLevelName"),
     state: document.getElementById("uiState"),
+    playerMode: document.getElementById("uiPlayerMode"),
     progress: document.getElementById("uiProgress"),
     attempts: document.getElementById("uiAttempts"),
     speed: document.getElementById("uiSpeed"),
@@ -500,96 +524,95 @@
   };
 
   const speedRange = document.getElementById("speedRange");
-  const gravRange = document.getElementById("gravRange");
-  const jumpRange = document.getElementById("jumpRange");
+  const gravRange  = document.getElementById("gravRange");
+  const jumpRange  = document.getElementById("jumpRange");
 
-  const btnMenu = document.getElementById("btnMenu");
-  const btnPause = document.getElementById("btnPause");
+  const btnMenu    = document.getElementById("btnMenu");
+  const btnPause   = document.getElementById("btnPause");
   const btnRestart = document.getElementById("btnRestart");
-  const btnPlay = document.getElementById("btnPlay");
+  const btnPlay    = document.getElementById("btnPlay");
 
-  const levelSelect = document.getElementById("levelSelect");
-  const overlay = document.getElementById("menuOverlay");
-  const levelsGrid = document.getElementById("levelsGrid");
-  const btnCloseMenu = document.getElementById("btnCloseMenu");
-  const btnMenuPlay = document.getElementById("btnMenuPlay");
-  
-  let selectedLevelId = null;
-
-  btnMenuPlay.onclick = () => {
-  if (!selectedLevelId) {
-    selectedLevelId = LEVELS[0].id;
-  }
-
-  setLevelById(selectedLevelId);
-  overlay.style.display = "none"; // 👈 ESTA LÍNEA
-  setMode("PLAYING");
-  updateKpis();
-  resetRun();
-};
+  const levelSelect   = document.getElementById("levelSelect");
+  const overlay       = document.getElementById("menuOverlay");
+  const levelsGrid    = document.getElementById("levelsGrid");
+  const btnCloseMenu  = document.getElementById("btnCloseMenu");
+  const btnMenuPlay   = document.getElementById("btnMenuPlay");
 
   const W = cv.width, H = cv.height;
   const groundY = H - 90;
 
+  // ==========================================================
+  //  Estado global
+  // ==========================================================
   const state = {
     mode: "MENU", // MENU | PLAYING | PAUSED | WIN | DEAD
-    level: null,
+    level: null,  // copia del nivel actual (con obstacles)
     attempts: 0,
-    t: 0,              // tiempo
-    camX: 0,           // cámara
-    startedAt: 0,
+    camX: 0,
     lastTime: 0,
+    // Para triggers "mode" sin repetir:
+    nextTriggerIdx: 0,
   };
 
-const player = {
-  x: 160,
-  y: groundY - 44,
-  w: 44,
-  h: 44,
-  vy: 0,
-  onGround: true,
-  alive: true,
-
-  // ORB
-  wantJump: false,
-  canOrb: true
-  };
-
-  // Ajustes runtime (se pueden cambiar con sliders)
+  // Ajustes runtime (sliders)
   const tuning = {
     speed: 340,
     gravity: 1650,
     jump: 520,
   };
 
-  // =========================
-  //  UI helpers
-  // =========================
-  function setMode(m){
-  state.mode = m;
+  // ==========================================================
+  //  Player + modos
+  // ==========================================================
+  const PLAYER_MODES = ["cube", "ship", "ball", "ufo", "wave"];
 
-  const isMenu = m === "MENU";
+  const player = {
+    // coords en pantalla (x fijo, el mundo se mueve con camX)
+    x: 160,
+    y: groundY - 44,
+    w: 44,
+    h: 44,
 
-  // 🔒 Bloquear ajustes cuando estás en menú
-  speedRange.disabled = isMenu;
-  gravRange.disabled  = isMenu;
-  jumpRange.disabled  = isMenu;
+    // física
+    vy: 0,
+    onGround: true,
+    alive: true,
 
-  if (isMenu) {
-    renderLevels();
-  }
+    // control
+    wantJump: false,   // true si está pulsando
+    pressedJump: false,// true solo 1 frame cuando "click/keydown"
+    canOrb: true,      // para no re-disparar orb en contacto continuo
 
-  const map = {
-    MENU: ["MENÚ", "var(--good)"],
-    PLAYING: ["JUGANDO", "var(--good)"],
-    PAUSED: ["PAUSA", "var(--warn)"],
-    WIN: ["VICTORIA", "var(--good)"],
-    DEAD: ["KO", "var(--bad)"],
+    // modo
+    mode: "cube",
+    gravitySign: 1,    // para ball (flip)
   };
 
-  ui.state.textContent = map[m][0];
-  ui.state.style.color = map[m][1];
-}
+  // ==========================================================
+  //  Helpers UI
+  // ==========================================================
+  function setMode(m){
+    state.mode = m;
+
+    const map = {
+      MENU: ["MENÚ", "var(--good)"],
+      PLAYING: ["JUGANDO", "var(--good)"],
+      PAUSED: ["PAUSA", "var(--warn)"],
+      WIN: ["VICTORIA", "var(--good)"],
+      DEAD: ["KO", "var(--bad)"],
+    };
+
+    ui.state.textContent = map[m][0];
+    ui.state.style.color = map[m][1];
+
+    ui.playerMode.textContent = (player.mode || "cube").toUpperCase();
+
+    // Sliders bloqueados en menú (pero visibles)
+    const isMenu = (m === "MENU");
+    speedRange.disabled = isMenu;
+    gravRange.disabled  = isMenu;
+    jumpRange.disabled  = isMenu;
+  }
 
   function updateKpis(){
     ui.attempts.textContent = state.attempts;
@@ -598,28 +621,38 @@ const player = {
     ui.speedBox.textContent = Math.round(tuning.speed);
     ui.gravBox.textContent = Math.round(tuning.gravity);
     ui.jumpBox.textContent = Math.round(tuning.jump);
+    ui.playerMode.textContent = (player.mode || "cube").toUpperCase();
   }
 
+  // ==========================================================
+  //  Nivel + selección
+  // ==========================================================
   function setLevelById(id){
     const lvl = LEVELS.find(l => l.id === id) || LEVELS[0];
+
+    // clon seguro (evita mutaciones)
     state.level = structuredClone(lvl);
 
-    // set tuning defaults for that level
-    tuning.speed = lvl.speed;
+    // defaults de tuning
+    tuning.speed   = lvl.speed;
     tuning.gravity = lvl.gravity;
-    tuning.jump = lvl.jump;
+    tuning.jump    = lvl.jump;
 
     speedRange.value = tuning.speed;
-    gravRange.value = tuning.gravity;
-    jumpRange.value = tuning.jump;
+    gravRange.value  = tuning.gravity;
+    jumpRange.value  = tuning.jump;
 
     ui.levelName.textContent = lvl.name;
+
+    // set modo inicial por triggers (si hay mode en x=0)
+    player.mode = "cube";
+    player.gravitySign = 1;
+    state.nextTriggerIdx = 0;
+    applyModeTriggersUpToX(0, true);
+
     updateKpis();
   }
 
-  // =========================
-  //  Level select UI
-  // =========================
   function buildLevelSelect(){
     levelSelect.innerHTML = "";
     LEVELS.forEach(l => {
@@ -640,15 +673,13 @@ const player = {
         <h4>${l.name} <span class="tag">${l.diff}</span></h4>
         <div style="color:var(--muted); font-size:13px; line-height:1.35">
           ${l.desc}<br/>
-          <span style="opacity:.9">Vel: <b>${l.speed}</b> · Grav: <b>${l.gravity}</b></span>
+          <span style="opacity:.9">Vel: <b>${l.speed}</b> · Grav: <b>${l.gravity}</b> · Jump: <b>${l.jump}</b></span>
         </div>
       `;
-     el.addEventListener("click", () => {
-  selectedLevelId = l.id;   // 🔥 ESTA ES LA CLAVE
-  levelSelect.value = l.id;
-  setLevelById(l.id);
-  highlightSelected();
-});
+      el.addEventListener("click", () => {
+        levelSelect.value = l.id;
+        setLevelById(l.id);
+        highlightSelected();
       });
       levelsGrid.appendChild(el);
     });
@@ -662,34 +693,41 @@ const player = {
     });
   }
 
-  // =========================
+  // ==========================================================
   //  Game flow
-  // =========================
+  // ==========================================================
   function resetRun(){
-    state.t = 0;
     state.camX = 0;
+    state.nextTriggerIdx = 0;
+
     player.x = 160;
     player.y = groundY - player.h;
     player.vy = 0;
     player.onGround = true;
     player.alive = true;
+    player.canOrb = true;
+
+    // modo por triggers iniciales (x=0)
+    player.mode = "cube";
+    player.gravitySign = 1;
+    applyModeTriggersUpToX(0, true);
+
     setMode("PLAYING");
     updateKpis();
   }
 
- function startGame(){
-  if(!state.level){
-    console.warn("No hay nivel seleccionado");
-    return;
+  function startGame(){
+    if(!state.level){
+      console.warn("No hay nivel seleccionado");
+      return;
+    }
+    state.attempts += 1;
+    resetRun();
   }
-  state.attempts += 1;
-  resetRun();
-}
 
   function restart(){
-    if(state.mode === "MENU"){
-      startGame();
-      return;
+    if(!state.level){
+      setLevelById(LEVELS[0].id);
     }
     state.attempts += 1;
     resetRun();
@@ -703,22 +741,56 @@ const player = {
   function openMenu(){
     overlay.classList.add("show");
     setMode("MENU");
+    // En menú NO cambiamos nivel automáticamente: solo UI
   }
 
   function closeMenu(){
     overlay.classList.remove("show");
-    // si estábamos en partida, no tocamos. si no, queda menú.
+    // No forzamos estado aquí, lo maneja startGame/resetRun
   }
 
-  // =========================
-  //  Physics + collision
-  // =========================
-  function jump(){
-    if(state.mode !== "PLAYING") return;
-    if(player.onGround){
-      player.vy = -tuning.jump;
-      player.onGround = false;
+  // ==========================================================
+  //  Obstacles → rects (mundo)
+  // ==========================================================
+  function obstacleToWorldRect(o){
+    const type = o?.type;
+    const x = Number(o?.x ?? 0);
+
+    if(type === "platform"){
+      const w = Number(o?.w ?? 240);
+      const h = Number(o?.h ?? 22);
+      const y = groundY + Number(o?.yOffset ?? -120);
+      return { type, x, y, w, h };
     }
+
+    if(type === "block"){
+      const w = Number(o?.w ?? 54);
+      const h = Number(o?.h ?? 54);
+      const y = (groundY - h) + Number(o?.yOffset ?? 0);
+      return { type, x, y, w, h };
+    }
+
+    if(type === "spike"){
+      const w = Number(o?.w ?? 36);
+      const h = Number(o?.h ?? 36);
+      const y = (groundY - h) + Number(o?.yOffset ?? 0);
+      return { type, x, y, w, h };
+    }
+
+    if(type === "orb"){
+      // orb es pequeño, flotante
+      const w = 28, h = 28;
+      const y = (groundY - 140) + Number(o?.yOffset ?? 0);
+      return { type, x: x, y, w, h };
+    }
+
+    // type "mode" no es colisionable
+    if(type === "mode"){
+      return { type, x, y: 0, w: 0, h: 0 };
+    }
+
+    // tipos desconocidos: no rompen nada
+    return { type: "unknown", x, y: 0, w: 0, h: 0 };
   }
 
   function rectsOverlap(a,b){
@@ -728,32 +800,371 @@ const player = {
             a.y + a.h > b.y);
   }
 
-  function obstacleToWorldRect(o){
-    // Obstáculos viven en coordenadas del "nivel" (x). En pantalla restamos camX al dibujar,
-    // pero para colisiones lo hacemos en mundo y comparamos con player.x+camX.
-    const base = { x:o.x, w:o.w, h:o.h, type:o.type };
-    if(o.type === "platform"){
-      const y = (groundY + (o.yOffset ?? -120));
-      return { x: base.x, y: y, w: base.w, h: base.h, type:o.type };
-    }
-    // spike / block: apoyados en suelo
-    return { x: base.x, y: groundY - base.h, w: base.w, h: base.h, type:o.type };
-  }
-
   function kill(){
     player.alive = false;
     setMode("DEAD");
   }
 
-  // =========================
+  // ==========================================================
+  //  Mode triggers
+  // ==========================================================
+  function normalizePlayerMode(m){
+    const mm = String(m || "").toLowerCase();
+    if(PLAYER_MODES.includes(mm)) return mm;
+    return "cube";
+  }
+
+  function applyModeTriggersUpToX(worldX, forceAll=false){
+    if(!state.level) return;
+
+    const obs = state.level.obstacles || [];
+    // Ordenamos por x solo una vez si hace falta
+    // (clon ya es estable, pero por si el user mete desorden)
+    // NOTA: no reordenamos el array para no romper referencias visuales,
+    // en su lugar recorremos por índice y confiamos en orden razonable.
+    while(state.nextTriggerIdx < obs.length){
+      const o = obs[state.nextTriggerIdx];
+      if(o?.type !== "mode"){
+        state.nextTriggerIdx++;
+        continue;
+      }
+
+      const ox = Number(o?.x ?? 0);
+      if(!forceAll && ox > worldX) break;
+
+      player.mode = normalizePlayerMode(o?.mode);
+      ui.playerMode.textContent = player.mode.toUpperCase();
+
+      // al cambiar modo, reseteos suaves
+      if(player.mode === "ball"){
+        player.gravitySign = 1;
+        player.vy = 0;
+      }
+      if(player.mode === "wave"){
+        // wave: mantenemos y dentro del “canal”
+        player.vy = 0;
+      }
+      if(player.mode === "ship"){
+        // ship: arranca en medio un poco para que se vea
+        player.vy = 0;
+      }
+      if(player.mode === "ufo"){
+        player.vy = 0;
+      }
+      if(player.mode === "cube"){
+        // cube en suelo si viene de otro modo
+        // (no forzamos, pero si está bajo el suelo lo corregimos)
+        if(player.y > groundY - player.h) player.y = groundY - player.h;
+      }
+
+      state.nextTriggerIdx++;
+    }
+  }
+
+  // ==========================================================
+  //  Inputs
+  // ==========================================================
+  function pressJump(){
+    player.wantJump = true;
+    player.pressedJump = true; // solo este frame
+    if(state.mode === "PLAYING"){
+      // cube: salto directo
+      if(player.mode === "cube"){
+        if(player.onGround){
+          player.vy = -tuning.jump;
+          player.onGround = false;
+        }
+      }
+
+      // ball: cambia gravedad al pulsar (toggle)
+      if(player.mode === "ball"){
+        player.gravitySign *= -1;
+      }
+
+      // ufo: cada pulsación impulsa
+      if(player.mode === "ufo"){
+        player.vy = -tuning.jump * 0.9;
+        player.onGround = false;
+      }
+
+      // wave: cambia dirección con mantener/soltar, aquí no hacemos nada extra
+      // ship: mantener/soltar se evalúa en tick
+    }
+  }
+
+  function releaseJump(){
+    player.wantJump = false;
+  }
+
+  // ==========================================================
+  //  Física por modo
+  // ==========================================================
+  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+  function physicsCube(dt){
+    // gravedad
+    player.prevY = player.y;
+    player.vy += tuning.gravity * dt;
+    player.y  += player.vy * dt;
+
+    // suelo
+    if(player.y >= groundY - player.h){
+      player.y = groundY - player.h;
+      player.vy = 0;
+      player.onGround = true;
+    } else {
+      player.onGround = false;
+    }
+  }
+
+  function physicsShip(dt){
+    // SHIP: gravedad + “thrust” al mantener pulsado
+    const thrust = tuning.jump * 3.0;  // empuje
+    const g = tuning.gravity;
+
+    player.prevY = player.y;
+
+    // gravedad
+    player.vy += g * dt;
+
+    // thrust si mantiene
+    if(player.wantJump){
+      player.vy -= thrust * dt;
+    }
+
+    // límite para evitar locuras
+    player.vy = clamp(player.vy, -900, 900);
+    player.y += player.vy * dt;
+
+    // límites de pantalla (canal)
+    const top = 40;
+    const bottom = groundY - player.h;
+    if(player.y < top){
+      player.y = top;
+      player.vy = 0;
+    }
+    if(player.y > bottom){
+      player.y = bottom;
+      player.vy = 0;
+    }
+
+    player.onGround = (player.y >= bottom - 0.5);
+  }
+
+  function physicsBall(dt){
+    // BALL: gravedad invertible
+    const g = tuning.gravity * player.gravitySign;
+
+    player.prevY = player.y;
+    player.vy += g * dt;
+    player.y  += player.vy * dt;
+
+    // colisiona con “suelo” y “techo” (techo virtual)
+    const bottom = groundY - player.h;
+    const top = 60;
+
+    if(player.gravitySign === 1){
+      if(player.y >= bottom){
+        player.y = bottom;
+        player.vy = 0;
+        player.onGround = true;
+      } else player.onGround = false;
+      if(player.y < top){
+        player.y = top;
+        player.vy = 0;
+      }
+    } else {
+      // gravedad hacia arriba
+      if(player.y <= top){
+        player.y = top;
+        player.vy = 0;
+        player.onGround = true;
+      } else player.onGround = false;
+      if(player.y > bottom){
+        player.y = bottom;
+        player.vy = 0;
+      }
+    }
+  }
+
+  function physicsUfo(dt){
+    // UFO: como cube pero sin suelo estricto, y con impulsos por pulsación (ya hechos)
+    player.prevY = player.y;
+    player.vy += tuning.gravity * dt;
+    player.y  += player.vy * dt;
+
+    const top = 50;
+    const bottom = groundY - player.h;
+
+    if(player.y < top){
+      player.y = top;
+      player.vy = 0;
+    }
+    if(player.y > bottom){
+      player.y = bottom;
+      player.vy = 0;
+      player.onGround = true;
+    } else {
+      player.onGround = false;
+    }
+  }
+
+  function physicsWave(dt){
+    // WAVE: se mueve en diagonal, control = mantener para subir
+    // vertical speed proporcional a la velocidad del nivel
+    const v = tuning.speed * 0.95;
+    const dir = player.wantJump ? -1 : 1; // mantener sube, soltar baja
+    player.prevY = player.y;
+    player.vy = dir * v;
+    player.y += player.vy * dt;
+
+    const top = 60;
+    const bottom = groundY - player.h;
+    if(player.y < top) player.y = top;
+    if(player.y > bottom) player.y = bottom;
+
+    player.onGround = (player.y >= bottom - 0.5);
+  }
+
+  function runPhysics(dt){
+    if(player.mode === "cube") return physicsCube(dt);
+    if(player.mode === "ship") return physicsShip(dt);
+    if(player.mode === "ball") return physicsBall(dt);
+    if(player.mode === "ufo")  return physicsUfo(dt);
+    if(player.mode === "wave") return physicsWave(dt);
+    // fallback
+    return physicsCube(dt);
+  }
+
+  // ==========================================================
+  //  Colisiones (dependen del modo)
+  // ==========================================================
+  function worldPlayerRect(){
+    // jugador en mundo = x fijo en pantalla + camX
+    return { x: player.x + state.camX, y: player.y, w: player.w, h: player.h };
+  }
+
+  function handleOrbs(pWorld){
+    if(!state.level) return;
+    for(const o of state.level.obstacles){
+      if(o?.type !== "orb") continue;
+      const r = obstacleToWorldRect(o);
+
+      // cerca de cámara
+      if(r.x < state.camX - 200 || r.x > state.camX + W + 300) continue;
+
+      const hit = rectsOverlap(pWorld, r);
+
+      if(hit){
+        // requiere “pulsación” (pressedJump) o mantener (wantJump) según modo
+        const wants = (player.pressedJump || player.wantJump);
+
+        if(wants && player.canOrb){
+          // efecto orb por modo
+          if(player.mode === "cube" || player.mode === "ufo"){
+            player.vy = -tuning.jump * 1.1;
+            player.onGround = false;
+          } else if(player.mode === "ship"){
+            // orb en ship = pequeño empujón hacia arriba
+            player.vy -= tuning.jump * 0.35;
+          } else if(player.mode === "ball"){
+            // orb en ball = flip + boost
+            player.gravitySign *= -1;
+            player.vy = -tuning.jump * 0.45 * player.gravitySign;
+          } else if(player.mode === "wave"){
+            // orb en wave = micro ajuste
+            player.y -= 22;
+          }
+          player.canOrb = false;
+        }
+      } else {
+        player.canOrb = true;
+      }
+    }
+  }
+
+  function handleSolidCollisions(pWorld){
+    if(!state.level) return;
+
+    for(const o of state.level.obstacles){
+      if(!o || !o.type) continue;
+
+      // ignorar triggers
+      if(o.type === "mode" || o.type === "orb") continue;
+
+      const r = obstacleToWorldRect(o);
+
+      // frustum
+      if(r.x + r.w < state.camX - 200) continue;
+      if(r.x > state.camX + W + 300) continue;
+
+      // SPIKE: muerte si toca “zona peligrosa”
+      if(r.type === "spike"){
+        // cube/ball/ufo: si overlap => muerte
+        // ship/wave: también
+        if(rectsOverlap(pWorld, r)){
+          kill();
+          return;
+        }
+        continue;
+      }
+
+      // PLATFORM: solo “pisable” (para cube/ball/ufo)
+      if(r.type === "platform"){
+        if(player.mode === "ship" || player.mode === "wave"){
+          // en estos modos, plataforma es obstáculo sólido
+          if(rectsOverlap(pWorld, r)){ kill(); return; }
+          continue;
+        }
+
+        const above = (player.prevY + player.h) <= (r.y + 18);
+        const willTouch = rectsOverlap(pWorld, r);
+        if(above && willTouch && player.vy > 0){
+          player.y = r.y - player.h;
+          player.vy = 0;
+          player.onGround = true;
+        }
+        continue;
+      }
+
+      // BLOCK: sólido. En cube/ball/ufo permite caer encima, lateral mata.
+      if(r.type === "block"){
+        const overlap = rectsOverlap(pWorld, r);
+
+        if(player.mode === "ship" || player.mode === "wave"){
+          if(overlap){ kill(); return; }
+          continue;
+        }
+
+        const prevBottom = player.prevY + player.h;
+        const currBottom = player.y + player.h;
+
+        const fallingFromAbove =
+          prevBottom <= r.y &&
+          currBottom >= r.y &&
+          player.vy > 0 &&
+          pWorld.x + pWorld.w > r.x &&
+          pWorld.x < r.x + r.w;
+
+        if(fallingFromAbove){
+          player.y = r.y - player.h;
+          player.vy = 0;
+          player.onGround = true;
+        } else if(overlap){
+          kill();
+          return;
+        }
+      }
+    }
+  }
+
+  // ==========================================================
   //  Render
-  // =========================
+  // ==========================================================
   function drawBackground(){
-    // estrellas simples
     ctx.fillStyle = "#050818";
     ctx.fillRect(0,0,W,H);
 
-    // glow
     const g = ctx.createRadialGradient(W*0.25, H*0.2, 40, W*0.25, H*0.2, 520);
     g.addColorStop(0, "#2b5cff22");
     g.addColorStop(1, "#0000");
@@ -772,7 +1183,6 @@ const player = {
     ctx.fillStyle = "#0b1634";
     ctx.fillRect(0, groundY, W, H-groundY);
 
-    // línea superior
     ctx.strokeStyle = "#ffffff22";
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -780,7 +1190,6 @@ const player = {
     ctx.lineTo(W, groundY);
     ctx.stroke();
 
-    // cuadritos (sensación GD)
     ctx.fillStyle = "#ffffff0f";
     const size = 24;
     for(let x=0; x<W; x+=size){
@@ -790,6 +1199,8 @@ const player = {
 
   function drawObstacle(o){
     const r = obstacleToWorldRect(o);
+    if(r.type === "unknown" || r.type === "mode") return;
+
     const sx = r.x - state.camX;
     const sy = r.y;
 
@@ -799,10 +1210,10 @@ const player = {
       ctx.strokeStyle = "#93c5ff66";
       ctx.lineWidth = 2;
       ctx.strokeRect(sx+1, sy+1, r.w-2, r.h-2);
-      // brillo
       ctx.fillStyle = "#ffffff18";
       ctx.fillRect(sx+4, sy+4, r.w-8, 8);
-    } else if(r.type === "spike"){
+    }
+    else if(r.type === "spike"){
       ctx.fillStyle = "#ff5b6eaa";
       ctx.strokeStyle = "#ffd1d7aa";
       ctx.lineWidth = 2;
@@ -813,12 +1224,39 @@ const player = {
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
-    } else if(r.type === "platform"){
+    }
+    else if(r.type === "platform"){
       ctx.fillStyle = "#38d39f44";
       ctx.fillRect(sx, sy, r.w, r.h);
       ctx.strokeStyle = "#38d39f99";
       ctx.lineWidth = 2;
       ctx.strokeRect(sx+1, sy+1, r.w-2, r.h-2);
+    }
+    else if(r.type === "orb"){
+      // orb: círculo brillante
+      const cx = sx + r.w/2;
+      const cy = sy + r.h/2;
+      const rad = r.w/2;
+
+      const gg = ctx.createRadialGradient(cx, cy, 2, cx, cy, rad+8);
+      gg.addColorStop(0, "#ffffffcc");
+      gg.addColorStop(0.25, "#38d39fcc");
+      gg.addColorStop(1, "#38d39f11");
+      ctx.fillStyle = gg;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rad+6, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.fillStyle = "#38d39fbb";
+      ctx.beginPath();
+      ctx.arc(cx, cy, rad, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.strokeStyle = "#ffffff88";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rad, 0, Math.PI*2);
+      ctx.stroke();
     }
   }
 
@@ -826,28 +1264,80 @@ const player = {
     const px = player.x;
     const py = player.y;
 
-    // cubo
-    ctx.fillStyle = "#e9f0ff";
-    ctx.fillRect(px, py, player.w, player.h);
+    // color por modo
+    let fill = "#e9f0ff";
+    if(player.mode === "ship") fill = "#c7ffe9";
+    if(player.mode === "ball") fill = "#ffe9b8";
+    if(player.mode === "ufo")  fill = "#d9c6ff";
+    if(player.mode === "wave") fill = "#bfe0ff";
 
-    // borde
+    // forma por modo (simple)
+    ctx.fillStyle = fill;
+
+    if(player.mode === "ship"){
+      // triángulo nave
+      ctx.beginPath();
+      ctx.moveTo(px, py + player.h*0.5);
+      ctx.lineTo(px + player.w, py);
+      ctx.lineTo(px + player.w, py + player.h);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "#00000055";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      return;
+    }
+
+    if(player.mode === "ball"){
+      const cx = px + player.w/2;
+      const cy = py + player.h/2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, player.w/2, 0, Math.PI*2);
+      ctx.fill();
+      ctx.strokeStyle = "#00000055";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      return;
+    }
+
+    if(player.mode === "wave"){
+      // rombo
+      const cx = px + player.w/2;
+      const cy = py + player.h/2;
+      ctx.beginPath();
+      ctx.moveTo(cx, py);
+      ctx.lineTo(px + player.w, cy);
+      ctx.lineTo(cx, py + player.h);
+      ctx.lineTo(px, cy);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "#00000055";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      return;
+    }
+
+    // cube / ufo (cuadro)
+    ctx.fillRect(px, py, player.w, player.h);
     ctx.strokeStyle = "#00000055";
     ctx.lineWidth = 2;
     ctx.strokeRect(px+1, py+1, player.w-2, player.h-2);
 
-    // “cara”
-    ctx.fillStyle = "#0b1634";
-    ctx.fillRect(px+12, py+14, 6, 6);
-    ctx.fillRect(px+26, py+14, 6, 6);
-    ctx.fillRect(px+16, py+28, 12, 4);
+    // “cara” en cube
+    if(player.mode === "cube"){
+      ctx.fillStyle = "#0b1634";
+      ctx.fillRect(px+12, py+14, 6, 6);
+      ctx.fillRect(px+26, py+14, 6, 6);
+      ctx.fillRect(px+16, py+28, 12, 4);
+    }
   }
 
   function drawHUD(){
     if(!state.level) return;
+
     const prog = Math.max(0, Math.min(1, state.camX / state.level.length));
     ui.progress.textContent = Math.round(prog*100) + "%";
 
-    // barra progreso
     const barW = W - 40, barH = 10, x = 20, y = 18;
     ctx.fillStyle = "#ffffff14";
     ctx.fillRect(x, y, barW, barH);
@@ -862,21 +1352,18 @@ const player = {
       ctx.fillText("Pulsa JUGAR o abre MENÚ (M)", 22, 72);
       ctx.fillStyle = "#b9c8ffcc";
       ctx.font = "600 14px system-ui";
-      ctx.fillText("Objetivo: saltar obstáculos. Ajusta velocidad/gravedad si lo notas raro.", 22, 96);
+      ctx.fillText("Objetivo: sobrevivir. Los orbes ayudan. Los modos cambian el control.", 22, 96);
     }
-
     if(state.mode === "PAUSED"){
       ctx.fillStyle = "#ffffffdd";
       ctx.font = "900 36px system-ui";
       ctx.fillText("PAUSA", 22, 80);
     }
-
     if(state.mode === "DEAD"){
       ctx.fillStyle = "#ffccd3";
       ctx.font = "900 34px system-ui";
       ctx.fillText("¡KO! Pulsa R para reiniciar", 22, 80);
     }
-
     if(state.mode === "WIN"){
       ctx.fillStyle = "#c7ffe9";
       ctx.font = "900 34px system-ui";
@@ -884,109 +1371,31 @@ const player = {
     }
   }
 
-  // =========================
+  // ==========================================================
   //  Loop
-  // =========================
+  // ==========================================================
   function tick(ts){
     if(!state.lastTime) state.lastTime = ts;
     const dt = Math.min(0.033, (ts - state.lastTime) / 1000);
     state.lastTime = ts;
 
-    // Update
-    if(state.mode === "PLAYING" && state.level){
-      // cámara avanza
+    // UPDATE
+    if(state.mode === "PLAYING" && state.level && player.alive){
+      // cámara avanza siempre
       state.camX += tuning.speed * dt;
 
-      // gravedad
-      player.prevY = player.y;
-      player.vy += tuning.gravity * dt;
-      player.y += player.vy * dt;
-     // pinchos: matar al pisarlos (Geometry Dash style)
-for (const o of state.level.obstacles) {
-  if (o.type !== "spike") continue;
+      // triggers de modo
+      applyModeTriggersUpToX(state.camX + player.x + 10, false);
 
-  const r = obstacleToWorldRect(o);
+      // física por modo
+      runPhysics(dt);
 
-  const overlapX =
-    (player.x + state.camX + player.w) > r.x &&
-    (player.x + state.camX) < r.x + r.w;
+      // orbes
+      const pWorld = worldPlayerRect();
+      handleOrbs(pWorld);
 
-  const touchingGround =
-    player.y + player.h >= r.y - 2; // margen de seguridad
-
-  if (overlapX && touchingGround) {
-    kill();
-    break;
-  }
-}
-
-      // suelo
-      
-      if(player.y >= groundY - player.h){
-        player.y = groundY - player.h;
-        player.vy = 0;
-        player.onGround = true;
-      }
-
-      // colisiones (en mundo)
-      const pWorld = { x: player.x + state.camX, y: player.y, w: player.w, h: player.h };
-
-      for(const o of state.level.obstacles){
-        const r = obstacleToWorldRect(o);
-        // ======================
-// ORB (salto extra)
-// ======================
-if (r.type === "orb") {
-  if (rectsOverlap(pWorld, r)) {
-    if (player.wantJump && player.canOrb) {
-      player.vy = -tuning.jump * 1.1;
-      player.onGround = false;
-      player.canOrb = false;
-    }
-  } else {
-    player.canOrb = true;
-  }
-  continue;
-}
-
-        // plataformas: si caemos encima, se puede “pisar”
-        if(r.type === "platform"){
-          // condición de aterrizaje: venimos desde arriba y tocamos la parte superior
-          const above = (pWorld.y + pWorld.h) <= (r.y + 18);
-          const willTouch = rectsOverlap(pWorld, r);
-          if(above && willTouch && player.vy > 0){
-            // ponemos jugador encima de plataforma
-            player.y = r.y - player.h;
-            player.vy = 0;
-            player.onGround = true;
-          }
-          continue;
-        }
-
-        // block: sólido desde arriba (Geometry Dash)
-if (r.type === "block") {
-  const prevBottom = player.prevY + player.h;
-  const currBottom = player.y + player.h;
-
-  const fallingFromAbove =
-    prevBottom <= r.y &&
-    currBottom >= r.y &&
-    player.vy > 0 &&
-    pWorld.x + pWorld.w > r.x &&
-    pWorld.x < r.x + r.w;
-
-  if (fallingFromAbove) {
-    // apoyarse encima del bloque
-    player.y = r.y - player.h;
-    player.vy = 0;
-    player.onGround = true;
-  } else if (rectsOverlap(pWorld, r)) {
-    // lateral o por debajo = muerte
-    kill();
-    break;
-  }
-}
-      }
+      // colisiones sólidas
+      handleSolidCollisions(pWorld);
 
       // win
       if(state.camX >= state.level.length){
@@ -994,17 +1403,19 @@ if (r.type === "block") {
       }
     }
 
-    // Render
+    // RENDER
     drawBackground();
     drawGround();
 
     if(state.level){
-      // dibujar solo obstáculos cercanos para rendimiento
       const viewL = state.camX - 200;
       const viewR = state.camX + W + 300;
+
       for(const o of state.level.obstacles){
-        if(o.x + (o.w||0) < viewL) continue;
-        if(o.x > viewR) continue;
+        const ox = Number(o?.x ?? 0);
+        const ow = Number(o?.w ?? 0);
+        if(ox + ow < viewL) continue;
+        if(ox > viewR) continue;
         drawObstacle(o);
       }
     }
@@ -1012,29 +1423,50 @@ if (r.type === "block") {
     drawPlayer();
     drawHUD();
 
+    // reset “pressedJump” tras un frame
+    player.pressedJump = false;
+
     requestAnimationFrame(tick);
   }
 
-  // =========================
-  //  Inputs
-  // =========================
+  // ==========================================================
+  //  Eventos teclado / touch
+  // ==========================================================
   window.addEventListener("keydown", (e) => {
     const k = e.key.toLowerCase();
-    if(k === " " || k === "arrowup") { e.preventDefault(); jump(); }
+    if(k === " " || k === "arrowup") { e.preventDefault(); pressJump(); }
     if(k === "p") togglePause();
     if(k === "r") restart();
     if(k === "m") openMenu();
   });
 
-  cv.addEventListener("pointerdown", () => jump());
+  window.addEventListener("keyup", (e) => {
+    const k = e.key.toLowerCase();
+    if(k === " " || k === "arrowup") { e.preventDefault(); releaseJump(); }
+  });
+
+  cv.addEventListener("pointerdown", () => pressJump());
+  window.addEventListener("pointerup", () => releaseJump());
 
   // Buttons
   btnMenu.addEventListener("click", openMenu);
   btnCloseMenu.addEventListener("click", closeMenu);
   btnPause.addEventListener("click", togglePause);
   btnRestart.addEventListener("click", restart);
-  btnPlay.addEventListener("click", () => { closeMenu(); startGame(); });
-  btnMenuPlay.addEventListener("click", () => { closeMenu(); startGame(); });
+
+  btnPlay.addEventListener("click", () => {
+    closeMenu();
+    // asegurar nivel seleccionado
+    if(!state.level) setLevelById(levelSelect.value || LEVELS[0].id);
+    startGame();
+  });
+
+  btnMenuPlay.addEventListener("click", () => {
+    closeMenu();
+    // asegura nivel actual del select
+    setLevelById(levelSelect.value || LEVELS[0].id);
+    startGame();
+  });
 
   // Sliders
   speedRange.addEventListener("input", () => {
@@ -1056,16 +1488,18 @@ if (r.type === "block") {
     highlightSelected();
   });
 
-  // =========================
+  // ==========================================================
   //  Init
-  // =========================
-  buildLevelSelect();      // 🔹 rellena el <select>
-buildMenuGrid();        // 🔹 rellena la cuadrícula visual
-setLevelById(LEVELS[0].id);
-setMode("MENU");
-updateKpis();
-requestAnimationFrame(tick);
+  // ==========================================================
+  buildLevelSelect();
+  buildMenuGrid();
 
+  levelSelect.value = LEVELS[0].id;
+  setLevelById(LEVELS[0].id);
+
+  setMode("MENU");
+  updateKpis();
+  requestAnimationFrame(tick);
 })();
 </script>
 </body>
