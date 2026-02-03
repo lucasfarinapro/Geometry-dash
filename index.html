@@ -1060,12 +1060,12 @@ if (r.type === "block") {
   // =========================
   //  Init
   // =========================
-  buildLevelSelect();
-  setLevelById(LEVELS[0].id);
-  buildMenuGrid();
-  updateKpis();
-  setMode("MENU");
-  requestAnimationFrame(tick);
+  buildLevelSelect();      // 🔹 rellena el <select>
+buildMenuGrid();        // 🔹 rellena la cuadrícula visual
+setLevelById(LEVELS[0].id);
+setMode("MENU");
+updateKpis();
+requestAnimationFrame(tick);
 
 })();
 </script>
